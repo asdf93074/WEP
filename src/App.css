@@ -1,0 +1,180 @@
+body {
+	background-color: #504949;
+}
+
+.columnContainer {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+
+#leftColumn {
+/*	left: 0.5%;*/
+	position: absolute;
+/*	border: 2px solid lightslategray;*/
+	width: 14.5%;
+	height: 95%;
+	background-color: white;
+	top: 10px;
+}
+
+#rightColumn {
+	left: 84.5%;
+	position: absolute;
+/*	border: 2px solid black;*/
+	width: 15.5%;
+	height: 95%;
+	background-color: white;
+	top: 10px;
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+
+#middleColumn {
+	left: 14.5%;
+	position: absolute;
+/*	border: 2px solid black;*/
+	width: 70%;
+	height: 95%;
+	top: 10px;
+	background-color: darkgray;
+}
+
+#chatBox  {
+	font-size: 18px;
+	padding-left: 10px;
+	position: absolute;
+	border: 2px solid black;
+	border-radius: 5px;
+	width: 85%;
+	height: 5%;
+	bottom: 5px;
+	left: 1.5%;
+}
+
+#chatBox:focus {
+	border: 1px solid transparent;
+	outline-width: 0;
+}
+
+#chatButton  {
+	font-size: 18px;
+	position: absolute;
+	border: none;
+	text-align: center;
+	border-radius: 5px;
+	width: 10%;
+	height: 5.5%;
+	right: 15px;
+	bottom: 7px;
+}
+
+#chatButton:focus {
+	border: none;
+	outline-width: 0;
+}
+
+.ChatWindow {
+	overflow-y: auto;
+	overflow-x: hidden;
+	overflow-wrap: break-word;
+	position: absolute;
+	width: 97.5%;
+	height: 85%;
+	background-color: white;
+	left: 1.5%;
+	top: 10px;
+	border: 2px solid black;
+	border-radius: 5px;
+}
+
+.message {
+	overflow-x: auto;
+	font-size: 18px;
+	padding: 8px;
+/*	border-top: 2px solid black;*/
+}
+
+.userNames {
+	font-style: italic;
+	display: inline;
+}
+
+#playersListHead {
+	font-size: 20px;
+	padding-bottom: 5px;
+	border-bottom: 1px solid black;
+	text-align: center;
+	position: sticky;
+	top: 0px;
+	background-color: white;
+}
+
+.playersListUserNames {
+	margin: 0 0 0 0;
+	padding-bottom: 5px;
+	border-bottom: 1px solid black;
+	font-style: italic;
+	font-weight: bold;
+	text-align: center;
+	cursor: pointer;
+}
+
+.playersListUserNames:hover {
+	background-color: lightgrey;
+}
+
+.rightClickMenu {
+	position: absolute;
+	border: 1px solid black;
+	border-radius: 5px;
+	font-size: 15px;
+	visibility: hidden;
+	left: 0px;
+	top: 0px;
+	background-color: white;
+}
+
+.rightClickMenuItem {
+	font-size: 15px;
+	margin: 0;
+	border-radius: 5px;
+	padding: 5px;
+/*	border: 0.5px solid black;*/
+	cursor: pointer;
+	z-index: 1;
+	background-color: white;
+}
+
+.rightClickMenuItem:hover {
+	background-color: lightgrey;
+	color: white;
+}
+
+#tabBar {
+	position: relative;
+	width: 97.5%;
+	left: 1.5%;
+	color: white;
+	font-size: 15px;
+	top: 1.25%;
+}
+
+.chatTab {
+	border: 1px solid black;
+	margin-right: 0.5%;
+	border-radius: 2px 5px 0 0;
+	border-bottom: 0px;
+	padding: 5px;
+	padding-bottom: 0px;
+	z-index: 1;
+	display: inline;
+	background-color: darkslategray;
+	cursor: default;
+}
+
+#ChatWindows {
+	height: 100%;
+	width: 100%;
+	position: relative;
+}
