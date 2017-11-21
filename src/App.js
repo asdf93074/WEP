@@ -7,7 +7,7 @@ import './App.css';
 function Message(props) {
 	var c = [];
 	for (let i = 0; i < props.data.length; i++) {
-		c.push(<div className="message"><p className="userNames">{props.username}</p>{": " + props.data[i]}</div>);
+		c.push(<div className="message"><p className="userNames">{props.username}</p>{": " + props.data[i][0]}<p class="messageTime">Time: {props.data[i][1]}</p></div>);
 	}
 	return c;
 }
@@ -172,6 +172,7 @@ class App extends Component {
 	sendMessage = (e)=>{
 		if (e.keyCode == 13) {
 			var data = document.getElementById('chatBox').value;
+			data = [data, new Date().toLocaleTimeString()];
 			var currentMessages = [...this.state.tabs[this.state.activeTab].messages, data];
 			this.state.tabs[this.state.activeTab].messages = currentMessages;
 			document.getElementById('chatBox').value = '';
@@ -188,7 +189,7 @@ class App extends Component {
 	
 	newTab = (e)=> {
 		let l = this.state.tabs.length;
-		this.state.tabs.push({value: "Default" + l, messages: this.state.tabs[0].messages, username: 'faust'+l});
+		this.state.tabs.push({value: "Default" + l, messages: [], username: 'faust'+l});
 		this.activeTabHandler(l);
 		this.forceUpdate();
 	}

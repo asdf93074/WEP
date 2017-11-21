@@ -90,7 +90,7 @@ body {
 
 .message {
 	overflow-x: auto;
-	font-size: 18px;
+	font-size: 16px;
 	padding: 8px;
 /*	border-top: 2px solid black;*/
 }
@@ -112,6 +112,7 @@ body {
 
 .playersListUserNames {
 	margin: 0 0 0 0;
+	padding-top: 5px;
 	padding-bottom: 5px;
 	border-bottom: 1px solid black;
 	font-style: italic;
@@ -177,4 +178,10 @@ body {
 	height: 100%;
 	width: 100%;
 	position: relative;
+}
+
+.messageTime {
+	color: gray;
+	font-size: 10px;
+	float: right;
 }
