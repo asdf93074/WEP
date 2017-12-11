@@ -6,12 +6,6 @@ import registerServiceWorker from './registerServiceWorker';
 
 ReactDOM.render(<App />, document.getElementById('root'));
 
-//document.getElementById('chatBox').addEventListener("keypress", (e)=>{
-//	if (e.keyCode == 13) {
-//		var data = document.getElementById('chatBox').value;
-//		
-//		document.getElementById('chatBox').value = '';
-//	}
-//})
+document.getElementsByClassName("chatTab")[0].style.backgroundColor = "lightgrey";
 
 registerServiceWorker();

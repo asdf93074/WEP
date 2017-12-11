@@ -7,7 +7,7 @@ import './App.css';
 function Message(props) {
 	var c = [];
 	for (let i = 0; i < props.data.length; i++) {
-		c.push(<div className="message"><p className="userNames">{props.username}</p>{": " + props.data[i][0]}<p class="messageTime">Time: {props.data[i][1]}</p></div>);
+		c.push(<div className="message"><p className="userNames">{props.username}: </p>{props.data[i][0]}<p class="messageTime">Time: {props.data[i][1]}</p></div>);
 	}
 	return c;
 }
@@ -65,11 +65,14 @@ class PlayersList extends Component {
 		e.persist();
 		e.preventDefault();
 		document.getElementsByClassName("rightClickMenu")[0].style.visibility = "visible";
-		if (e.clientX + document.getElementsByClassName("rightClickMenu")[0].style.width > window.innerWidth) {
-			alert();
+		if (e.clientX + document.getElementsByClassName("rightClickMenu")[0].clientWidth - 1 > window.innerWidth) {
+			document.getElementsByClassName("rightClickMenu")[0].style.left = "";
+			document.getElementsByClassName("rightClickMenu")[0].style.right = "px";
+		} else {
+			document.getElementsByClassName("rightClickMenu")[0].style.right = "";
+			document.getElementsByClassName("rightClickMenu")[0].style.left = e.clientX - document.getElementsByClassName("rightClickMenu")[0].parentElement.offsetLeft + "px";
+			document.getElementsByClassName("rightClickMenu")[0].style.top = e.clientY + "px";
 		}
-		document.getElementsByClassName("rightClickMenu")[0].style.left = e.clientX - document.getElementsByClassName("rightClickMenu")[0].parentElement.offsetLeft + "px";
-		document.getElementsByClassName("rightClickMenu")[0].style.top = e.clientY + "px";
 	}
 	
 	render() {
@@ -78,18 +81,17 @@ class PlayersList extends Component {
 		for (let i = 0; i < this.state.users.length; i++) {
 			c.push(<p onContextMenu={this.rightClickHandler} className="playersListUserNames">{this.state.users[i]}</p>);
 		}
-		return c;
+		return (<div id="playersListUserNamesContainer">{c}</div>);
 	}
 }			   
 
 class ChatTab extends Component {
 	constructor(props) {
 		super(props);
-		console.log(props.activeTabHandler);
 		this.state = {
-		value: props.value,
-		target: props.target,
-		activeTabHandler: props.activeTabHandler
+			value: props.value,
+			target: props.target,
+			activeTabHandler: props.activeTabHandler
 		}
 	}
 	
@@ -157,6 +159,37 @@ class ChatWindowsRenderer extends Component {
 	}
 }
 
+class CurrentMatches extends Component {
+	constructor(props) {
+		super(props);
+		this.state = {matches: props.matches, startTime: props.startTime}
+	}
+	
+	render() {
+		var arr = [];
+		for (let i = 0; i < this.state.matches.length; i++) {
+			arr.push(<li className="CurrentMatch">{this.state.matches[i].matchID}</li>)
+		}
+		return (<div className="CurrentMatches"><p id="CurrentMatchesHead">Current Matches: {this.state.matches.length}</p><ul className="CurrentMatchesList">{arr}</ul></div>)
+	}
+}
+
+class OpenMatches extends Component {
+	constructor(props) {
+		super(props);
+		this.state = {matches: props.matches, startTime: props.startTime}
+	}
+	
+	render() {
+		var arr = [];
+		for (let i = 0; i < this.state.matches.length; i++) {
+			arr.push(<li className="OpenMatch">{this.state.matches[i].matchID}</li>)
+		}
+		return (<div className="OpenMatches"><p id="OpenMatchesHead">Open Matches: {this.state.matches.length}</p><ul className="OpenMatchesList">{arr}</ul></div>)
+	}
+}
+
+
 class App extends Component {
 	constructor(props) {
 		super(props);
@@ -165,7 +198,8 @@ class App extends Component {
 				   , "asdf93074", "asdf1234", "asdf3456", "fdej893rj", "asdf93074", "asdf1234", "asdf3456", "fdej893rj", "asdf93074", "asdf1234", "asdf3456", "fdej893rj"],
 			defaultChat: "Default",
 			tabs: [{value: "Default", messages: [], username: 'faust'}],
-			activeTab: 0
+			activeTab: 0,
+			currentMatches: [{matchID: "asd", startTime: new Date().toLocaleTimeString()}]
 		}
 	}
 	
@@ -201,14 +235,19 @@ class App extends Component {
 	render() {
 		return (
 			<div onClick={this.columnContainerContextMenu} className="columnContainer">
-				<div id="leftColumn"></div>
+				<div id="leftColumn">
+					<CurrentMatches matches={this.state.currentMatches}/>
+					<OpenMatches matches={this.state.currentMatches}/>
+				</div>
 				<div id="middleColumn">
 					<div id="tabBar">
 						<ChatTabRenderer tabs={this.state.tabs} activeTabHandler={this.activeTabHandler}/>
 					</div>
 					<ChatWindowsRenderer tabs={this.state.tabs} />
 					<input type="text" id="chatBox" placeholder="Message" onKeyDown={this.sendMessage}></input>
+						{/*
 					<button onClick={this.newTab} type="button" id="chatButton">Send</button>
+						*/}
 				</div>
 				<div id="rightColumn">
 					<OnlinePlayers users={this.state.users.length} />
