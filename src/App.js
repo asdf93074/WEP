@@ -202,16 +202,50 @@ class App extends Component {
 			activeTab: 0,
 			currentMatches: [{matchID: "asd", startTime: new Date().toLocaleTimeString()}]
 		}
+
+		this.adduser = this.adduser.bind(this);
+		this.sendMessage = this.sendMessage.bind(this);
+		this.updatechat = this.updatechat.bind(this);
 	}
 	
+	componentDidMount(){
+		console.log('mounted');
+		socket.on('connect', this.connect);
+		socket.on('adduser', this.adduser);
+		socket.on('updatechat', this.updatechat);
+	}
+
+	connect(){
+		socket.emit('adduser', prompt("Enter username"));
+	}
+
+	adduser(username){
+		console.log("added user " + username);
+		// this.state.tabs[0].username = username;
+	}
+
+	updatechat(data){
+		console.log("User: " + data.username);
+		console.log("Message: " + data.message);
+
+		var data_new = [data.message, new Date().toLocaleTimeString()];
+		var currentMessages = [...this.state.tabs[this.state.activeTab].messages, data_new];
+		this.state.tabs[this.state.activeTab].messages = currentMessages;
+		this.forceUpdate();
+	}
+
 	sendMessage = (e)=>{
 		if (e.keyCode == 13) {
 			var data = document.getElementById('chatBox').value;
-			data = [data, new Date().toLocaleTimeString()];
-			var currentMessages = [...this.state.tabs[this.state.activeTab].messages, data];
-			this.state.tabs[this.state.activeTab].messages = currentMessages;
+			// data = [data, new Date().toLocaleTimeString()];
+			
+			socket.emit('chat', {message: data});
 			document.getElementById('chatBox').value = '';
-			this.forceUpdate();
+
+			// var currentMessages = [...this.state.tabs[this.state.activeTab].messages, data];
+			// this.state.tabs[this.state.activeTab].messages = currentMessages;
+			// document.getElementById('chatBox').value = '';
+			// this.forceUpdate();
 		}
 	}
 	
