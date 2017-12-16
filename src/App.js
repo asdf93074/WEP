@@ -8,7 +8,7 @@ const socket = openSocket("http://localhost:4000");
 function Message(props) {
 	var c = [];
 	for (let i = 0; i < props.data.length; i++) {
-		c.push(<div className="message"><p className="userNames">{props.username}: </p>{props.data[i][0]}<p class="messageTime">Time: {props.data[i][1]}</p></div>);
+		c.push(<div className="message"><p className="userNames">{props.data[i].username}: </p>{props.data[i].message}<p class="messageTime">Time: {props.data[i][1]}</p></div>);
 	}
 	return c;
 }
@@ -57,10 +57,10 @@ class RightClickMenu extends Component {
 }
 
 class PlayersList extends Component {
-	constructor(props) {
-		super(props);
-		this.state = {users: props.users};
-	}
+	// constructor(props) {
+	// 	super(props);
+	// 	this.state = {users: props.users};
+	// }
 	
 	rightClickHandler(e) {
 		e.persist();
@@ -79,8 +79,8 @@ class PlayersList extends Component {
 	render() {
 		var c = [];
 
-		for (let i = 0; i < this.state.users.length; i++) {
-			c.push(<p onContextMenu={this.rightClickHandler} className="playersListUserNames">{this.state.users[i]}</p>);
+		for (let i = 0; i < this.props.users.length; i++) {
+			c.push(<p onContextMenu={this.rightClickHandler} className="playersListUserNames">{this.props.users[i]}</p>);
 		}
 		return (<div id="playersListUserNamesContainer">{c}</div>);
 	}
@@ -153,7 +153,7 @@ class ChatWindowsRenderer extends Component {
 		var c = [];
 		for (let i = 0; i < this.state.tabs.length; i++) {
 			c.push(<div className="ChatWindow" id={this.state.tabs[i].value+"Data"}>
-							<Message data={this.state.tabs[i].messages} username={this.state.tabs[i].username}/>
+							<Message data={this.state.tabs[i].messages} /*username={this.state.tabs[i].username}*//>
 						</div>)
 		}
 		return <div id="ChatWindows">{c}</div>;
@@ -195,17 +195,17 @@ class App extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			users: ["asdf93074", "asdf1234", "asdf3456", "fdej893rj", "asdf93074", "asdf1234", "asdf3456", "fdej893rj", "asdf93074", "asdf1234", "asdf3456", "fdej893rj"
-				   , "asdf93074", "asdf1234", "asdf3456", "fdej893rj", "asdf93074", "asdf1234", "asdf3456", "fdej893rj", "asdf93074", "asdf1234", "asdf3456", "fdej893rj"],
+			users: [],
 			defaultChat: "Default",
 			tabs: [{value: "Default", messages: [], username: 'faust'}],
 			activeTab: 0,
 			currentMatches: [{matchID: "asd", startTime: new Date().toLocaleTimeString()}]
 		}
 
-		this.adduser = this.adduser.bind(this);
 		this.sendMessage = this.sendMessage.bind(this);
 		this.updatechat = this.updatechat.bind(this);
+		this.connect = this.connect.bind(this);
+		this.adduser = this.adduser.bind(this);
 	}
 	
 	componentDidMount(){
@@ -215,22 +215,28 @@ class App extends Component {
 		socket.on('updatechat', this.updatechat);
 	}
 
-	connect(){
-		socket.emit('adduser', prompt("Enter username"));
+	adduser(users){
+		console.log(users);
+		this.state.users = users;
+		console.log(this.state.users);
+
+		this.forceUpdate();
 	}
 
-	adduser(username){
-		console.log("added user " + username);
-		// this.state.tabs[0].username = username;
+	connect(){
+		var name = prompt("Enter username");
+		socket.emit('adduser', name);
+		this.state.tabs[this.state.activeTab].username = name;
 	}
 
 	updatechat(data){
 		console.log("User: " + data.username);
 		console.log("Message: " + data.message);
 
-		var data_new = [data.message, new Date().toLocaleTimeString()];
-		var currentMessages = [...this.state.tabs[this.state.activeTab].messages, data_new];
-		this.state.tabs[this.state.activeTab].messages = currentMessages;
+		// var data_new = [data.message, new Date().toLocaleTimeString()];
+		this.state.tabs[this.state.activeTab].messages.push(data)
+		// var currentMessages = [...this.state.tabs[this.state.activeTab].messages, data_new];
+		// this.state.tabs[this.state.activeTab].messages = currentMessages;
 		this.forceUpdate();
 	}
 

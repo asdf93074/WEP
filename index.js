@@ -8,7 +8,7 @@ var server = app.listen(4000, function(){
 
 app.use(express.static('public'));
 
-var users = {};
+var users = [];
 var rooms = ['room1', 'room2', 'room3'];
 
 var io = socket(server);
@@ -20,9 +20,10 @@ io.sockets.on('connection', (socket) => {
 
     socket.on('adduser', function(username){
         socket.username = username;
-        users[username] = username;
+        users.push(username);
         console.log('add user event');
-        socket.emit('updaterooms', rooms, 'room1');
+        // socket.emit('updaterooms', rooms, 'room1');
+        io.sockets.in(socket.room).emit('adduser', users);
     });
 
     socket.on('changeroom', function(newroom){
