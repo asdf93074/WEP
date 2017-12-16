@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
-//import io from 'socket.io-client';
-//const socket = io('http://localhost:8000');
+import openSocket from 'socket.io-client';
+
+const socket = openSocket("http://localhost:4000");
 
 function Message(props) {
 	var c = [];
