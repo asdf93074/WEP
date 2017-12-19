@@ -1,7 +1,8 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto');
+@import url('fonts/web/stylesheet.css');
 
 body {
-	background-color: #ffffff;
+	background-color: #000000;
 	font-family: 'Roboto', sans-serif;
 }
 
@@ -13,14 +14,16 @@ body {
 
 #leftColumn {
 	color: #f0f0f0;
+	font-family: 'ansonregular';
 	left: 0%;
 	position: absolute;
 /*	border: 2px solid lightslategray;*/
 	width: 14.5%;
 	height: 97%;
-	background-color: rgba(9,8,9,0.9);
+	background-color: #6D98BA;
 	top: 1.5%;
 	overflow-y: auto;
+	overflow-x: hidden;
 	border-radius: 0 20px 20px 0;
 }
 
@@ -65,22 +68,21 @@ body {
 	width: 65%;
 	height: 95%;
 	top: 1.5%;
-	background-color: #121112;
-	padding-left: 2%;
+	background-color: #DEE5E5;
 	border-radius: 10px;
 }
 
 #chatBox  {
 	font-size: 18px;
-	padding-left: 10px;
 	position: absolute;
 	/*border: 2px solid black;*/
 	border: 0;
-	border-radius: 5px;
-	width: 82.9%;
-	height: 5%;
-	bottom: 4%;
-	left: 4.1%;
+	border-radius: 0 0 5px 5px;
+	padding-left: 2%;
+	padding-right: 2%;
+	width: 96%;
+	height: 7%;
+	top: 87%;
 }
 
 #chatBox:focus {
@@ -110,15 +112,13 @@ body {
 	overflow-x: hidden;
 	overflow-wrap: break-word;
 	position: absolute;
-	width: 85%;
-	height: 85%;
-	padding-left: 10px;
+	width: 100%;
+	height: 100%;
 	padding-top: 5px;
-	background-color: #212021;
-	left: 1.5%;
+	background-color: #DEE5E5;
 	top: 10px;
 	/*border: 2px solid black;*/
-	border-radius: 0px 5px 5px 5px;
+	border-radius: 5px 5px 0px 0px;
 }
 
 .ChatWindow::-webkit-scrollbar-track {
@@ -139,8 +139,8 @@ body {
 .message {
 	padding-top: 1%;
 	overflow-x: auto;
-	font-size: 14px;
-	padding: 0;
+	font-size: 18px;
+	padding: 5px 3%;
 /*	border-top: 2px solid black;*/
 }
 
@@ -148,14 +148,13 @@ body {
 	display: inline;
 	background-color: lightblue;
 	border-radius: 15px 150px 150px 150px;
-	margin-top: 0;
 	padding: 5px;
 }
 
 .userNames {
 	font-style: italic;
 	display: inline;
-	font-size: 14px;
+	font-size: 18px;
 	font-weight: bold;
 }
 
@@ -170,37 +169,36 @@ body {
 }
 
 .playersListUserNames {
-	margin-top: 5px;
-	padding-top: 5px;
-	padding-bottom: 5px;
 	/*border-bottom: 1px solid black;*/
 	font-style: italic;
-	font-weight: bold;
 	/*text-align: center;*/
 	vertical-align: middle;
 	cursor: pointer;
+	overflow: hidden;
+	text-align: center;
 }
 
 .playersListUserNames p {
+	font-size: 18px;
 	margin: auto;
-	margin-left: 25%;
+	
 	vertical-align: middle;
 	display: inline-block;
+	padding-top: 3%;
+	padding-bottom: 3%;
 }
 
 .playersListUserNames img {
 	width: 15%;
-	transition-duration: 0.1s;
 	position: absolute;
 	display: inline-block;
-	margin: auto;
-	margin-bottom: 50%;
+	margin-left: 9%;
 	background-color: white;
 	border-radius: 50px;
 }
 
-.playersListUserNames img:hover {
-	width: 16%;
+.playersListUserNames:hover {
+	background-color: rgb(98, 134, 167);
 	transition-duration: 0.1s;
 }
 
@@ -253,7 +251,7 @@ body {
 }
 
 #ChatWindows {
-	height: 100%;
+	height: 85%;
 	width: 100%;
 	position: relative;
 }
@@ -280,6 +278,7 @@ body {
 	text-align: center;
 	position: sticky;
 	top: 0px;
+	font-family: 'ansonregular';
 }
 
 .OpenMatchesList {
@@ -295,6 +294,7 @@ body {
 	text-align: center;
 	position: sticky;
 	top: 0px;
+	font-family: 'ansonregular';
 }
 
 #playersListUserNamesContainer {

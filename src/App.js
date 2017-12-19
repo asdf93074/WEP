@@ -16,7 +16,7 @@ function Message(props) {
 }
 
 function OnlinePlayers(props) {
-	return <p id="playersListHead">Players List: {props.users} Online</p>;
+	return <p id="playersListHead">Online - {props.users}</p>;
 }
 
 class RightClickMenuItems extends Component {
@@ -82,7 +82,8 @@ class PlayersList extends Component {
 		var c = [];
 
 		for (let i = 0; i < this.props.users.length; i++) {
-			c.push(<div onContextMenu={this.rightClickHandler} className="playersListUserNames"><img src="https://d30y9cdsu7xlg0.cloudfront.net/png/45447-200.png"></img><p>{this.props.users[i]}</p></div>);
+			c.push(<div onContextMenu={this.rightClickHandler} className="playersListUserNames">{/*<img src="https://d30y9cdsu7xlg0.cloudfront.net/png/45447-200.png"></img>*/}
+			<p>{this.props.users[i]}</p></div>);
 		}
 		return (<div id="playersListUserNamesContainer">{c}</div>);
 	}
@@ -173,7 +174,7 @@ class CurrentMatches extends Component {
 		for (let i = 0; i < this.state.matches.length; i++) {
 			arr.push(<li className="CurrentMatch">{this.state.matches[i].matchID}</li>)
 		}
-		return (<div className="CurrentMatches"><p id="CurrentMatchesHead">Current Matches: {this.state.matches.length}</p><ul className="CurrentMatchesList">{arr}</ul></div>)
+		return (<div className="CurrentMatches"><p id="CurrentMatchesHead">Current Matches - {this.state.matches.length}</p><ul className="CurrentMatchesList">{arr}</ul></div>)
 	}
 }
 
@@ -188,7 +189,7 @@ class OpenMatches extends Component {
 		for (let i = 0; i < this.state.matches.length; i++) {
 			arr.push(<li className="OpenMatch">{this.state.matches[i].matchID}</li>)
 		}
-		return (<div className="OpenMatches"><p id="OpenMatchesHead">Open Matches: {this.state.matches.length}</p><ul className="OpenMatchesList">{arr}</ul></div>)
+		return (<div className="OpenMatches"><p id="OpenMatchesHead">Open Matches - {this.state.matches.length}</p><ul className="OpenMatchesList">{arr}</ul></div>)
 	}
 }
 
