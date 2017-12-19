@@ -6,6 +6,6 @@ import registerServiceWorker from './registerServiceWorker';
 
 ReactDOM.render(<App />, document.getElementById('root'));
 
-document.getElementsByClassName("chatTab")[0].style.backgroundColor = "lightgrey";
+//document.getElementsByClassName("chatTab")[0].style.backgroundColor = "lightgrey";
 
 registerServiceWorker();
