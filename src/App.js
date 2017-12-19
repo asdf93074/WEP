@@ -3,6 +3,8 @@ import logo from './logo.svg';
 import './App.css';
 import openSocket from 'socket.io-client';
 
+var q = "https://d30y9cdsu7xlg0.cloudfront.net/png/45447-200.png";
+
 const socket = openSocket("http://localhost:4000");
 
 function Message(props) {
@@ -80,7 +82,7 @@ class PlayersList extends Component {
 		var c = [];
 
 		for (let i = 0; i < this.props.users.length; i++) {
-			c.push(<p onContextMenu={this.rightClickHandler} className="playersListUserNames">{this.props.users[i]}</p>);
+			c.push(<div onContextMenu={this.rightClickHandler} className="playersListUserNames"><img src="https://d30y9cdsu7xlg0.cloudfront.net/png/45447-200.png"></img><p>{this.props.users[i]}</p></div>);
 		}
 		return (<div id="playersListUserNamesContainer">{c}</div>);
 	}
@@ -232,7 +234,7 @@ class App extends Component {
 	updatechat(data){
 		console.log("User: " + data.username);
 		console.log("Message: " + data.message);
-
+		
 		// var data_new = [data.message, new Date().toLocaleTimeString()];
 		this.state.tabs[this.state.activeTab].messages.push(data)
 		// var currentMessages = [...this.state.tabs[this.state.activeTab].messages, data_new];
@@ -277,12 +279,13 @@ class App extends Component {
 		return (
 			<div onClick={this.columnContainerContextMenu} className="columnContainer">
 				<div id="leftColumn">
-					<CurrentMatches matches={this.state.currentMatches}/>
-					<OpenMatches matches={this.state.currentMatches}/>
+					<OnlinePlayers users={this.state.users.length} />
+					<PlayersList users={this.state.users} />
+					<RightClickMenu />
 				</div>
 				<div id="middleColumn">
 					<div id="tabBar">
-						<ChatTabRenderer tabs={this.state.tabs} activeTabHandler={this.activeTabHandler}/>
+					{/*<ChatTabRenderer tabs={this.state.tabs} activeTabHandler={this.activeTabHandler}/>*/}
 					</div>
 					<ChatWindowsRenderer tabs={this.state.tabs} />
 					<input type="text" id="chatBox" placeholder="Message" onKeyDown={this.sendMessage}></input>
@@ -291,9 +294,8 @@ class App extends Component {
 						*/}
 				</div>
 				<div id="rightColumn">
-					<OnlinePlayers users={this.state.users.length} />
-					<PlayersList users={this.state.users} />
-					<RightClickMenu />
+					<CurrentMatches matches={this.state.currentMatches}/>
+					<OpenMatches matches={this.state.currentMatches}/>
 				</div>
 			</div>
 		);

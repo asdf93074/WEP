@@ -2,7 +2,7 @@ var express = require('express');
 var socket = require('socket.io');
 
 var app = express();
-var server = app.listen(4000, function(){
+var server = app.listen(4000, '0.0.0.0', function(){
     console.log('listening for requests on port 4000,');
 });
 
@@ -18,12 +18,21 @@ io.sockets.on('connection', (socket) => {
     socket.room = 'room1';
     // console.log(socket.room);
 
+	socket.on('disconnect', function(){
+		console.log("USER DISCONNECTED: ", socket.username);
+		users.splice(users.indexOf(socket.username), 1);
+		io.sockets.in(socket.room).emit('adduser', users);
+	});
+	
     socket.on('adduser', function(username){
-        socket.username = username;
-        users.push(username);
-        console.log('add user event');
-        // socket.emit('updaterooms', rooms, 'room1');
-        io.sockets.in(socket.room).emit('adduser', users);
+		if (username != "") {
+			console.log("NEW USER: ", username);
+			socket.username = username;
+			users.push(username);
+			console.log('add user event');
+			// socket.emit('updaterooms', rooms, 'room1');
+		}
+		io.sockets.in(socket.room).emit('adduser', users);
     });
 
     socket.on('changeroom', function(newroom){
