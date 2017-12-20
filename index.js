@@ -16,6 +16,8 @@ io.sockets.on('connection', (socket) => {
 
     socket.join('room1');
     socket.room = 'room1';
+	
+	socket.emit('roomslist', rooms);
     // console.log(socket.room);
 
 	socket.on('disconnect', function(){

@@ -89,6 +89,32 @@ class PlayersList extends Component {
 	}
 }			   
 
+class TabName extends Component {
+	constructor(props){
+		super(props);
+		
+		this.state = {
+			name: this.props.tabName,
+			tabs: this.props.tabs
+		};
+	}
+	
+	render(){
+		let tabs = this.state.tabs;
+		let tabarr = [];
+		
+		for (let i = 0; i < tabs.length; i++){
+			tabarr.push(<li><p>{tabs[i].value}</p></li>);
+		}
+		
+		return (
+			<ul id="TabBarList">
+			{tabarr}
+			</ul>
+		)
+	}
+}
+
 class ChatTab extends Component {
 	constructor(props) {
 		super(props);
@@ -200,9 +226,9 @@ class App extends Component {
 		this.state = {
 			users: [],
 			defaultChat: "Default",
-			tabs: [{value: "Default", messages: [], username: 'faust'}],
+			tabs: [{value: "Default", messages: []}],
 			activeTab: 0,
-			currentMatches: [{matchID: "asd", startTime: new Date().toLocaleTimeString()}]
+			currentMatches: [{matchID: "shahmir vs pasha123", startTime: new Date().toLocaleTimeString()}]
 		}
 
 		this.sendMessage = this.sendMessage.bind(this);
@@ -216,6 +242,7 @@ class App extends Component {
 		socket.on('connect', this.connect);
 		socket.on('adduser', this.adduser);
 		socket.on('updatechat', this.updatechat);
+		socket.on('roomslist', this.roomslist);
 	}
 
 	adduser(users){
@@ -224,6 +251,11 @@ class App extends Component {
 		console.log(this.state.users);
 
 		this.forceUpdate();
+	}
+	
+	roomslist(rooms){
+		console.log(rooms);
+		
 	}
 
 	connect(){
@@ -274,6 +306,7 @@ class App extends Component {
 	
 	activeTabHandler = (e) => {
 		this.state.activeTab = e;
+		
 	}
 	
 	render() {
@@ -286,6 +319,7 @@ class App extends Component {
 				</div>
 				<div id="middleColumn">
 					<div id="tabBar">
+						<TabName tabName={this.state.tabs[this.state.activeTab].value} tabs={this.state.tabs}/>
 					{/*<ChatTabRenderer tabs={this.state.tabs} activeTabHandler={this.activeTabHandler}/>*/}
 					</div>
 					<ChatWindowsRenderer tabs={this.state.tabs} />

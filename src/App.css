@@ -229,13 +229,51 @@ body {
 	color: white;
 }
 
+#TabBarList{
+	padding-left: 0;
+	display: inline;
+	text-decoration: none;
+	list-style: none;
+}
+
+#TabBarList li{
+	vertical-align: middle;
+	display: inline;
+}
+
+#tabBar p{
+	display: inline-block;
+	margin-top: 0;
+	padding-top: 1%;
+	padding-bottom: 1%;
+	padding-left: 1.5%;
+	padding-right: 1.5%;
+	font-size: 20px;
+	font-family: "Arial";
+	margin-bottom: 0;
+}
+
+#tabBar li:first-child p:hover{
+	background-color: lightblue;
+	border-radius: 10px 0 0 0;
+}
+
+#tabBar p:hover{
+	background-color: lightblue;
+	border-radius: inherit;
+}
+
 #tabBar {
 	position: relative;
-	width: 97.5%;
-	left: 1.5%;
+	width: 100%;
+	left: 0;
 	color: white;
 	font-size: 15px;
-	top: 1.6%;
+	top: 0;
+	background-color: #AEB5B5;
+	border-bottom: 2px solid #3f3f3f;
+	border-radius: 10px 10px 0 0;
+	box-shadow: 0 5px 5px #4f4f4f;
 }
 
 .chatTab {
