@@ -103,22 +103,11 @@ class TabName extends Component {
 		let tabarr = [];
 		
 		for (let i = 0; i < tabs.length; i++){
-			tabarr.push(<p>{tabs[i].value}</p>);
+			tabarr.push(<p id={tabs[i].value}>{tabs[i].value}</p>);
 		}
 		
 		return (
 			<div id="TabBarList">
-				{tabarr}
-				{tabarr}
-				{tabarr}
-				{tabarr}
-				{tabarr}
-				{tabarr}
-				{tabarr}
-				{tabarr}
-				{tabarr}
-				{tabarr}
-				{tabarr}
 				{tabarr}
 			</div>
 		)
@@ -305,17 +294,20 @@ class App extends Component {
 		};
 	}
 	
-	newTab(){
-		console.log("new tab");
+	newTab(e){
+		console.log("ASDASDFASDF");
+		console.log(e);
+		
 		let l = this.state.tabs.length;
 		this.state.tabs.push({value: "Default" + l, messages: [], username: 'faust'+l});
+		document.getElementsByClassName("rightClickMenu")[0].style.visibility = "hidden";
 		this.activeTabHandler(l);
 		this.forceUpdate();
 	}
 	
 	activeTabHandler = (e) => {
 		this.state.activeTab = e;
-		
+		console.log(this.state.tabs);
 	}
 	
 	render() {

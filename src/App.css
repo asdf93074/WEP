@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto');
 @import url('fonts/web/stylesheet.css');
+@import url('fonts/fontawesome/fontawesome.min.css');
 
 body {
 	background-color: #000000;
