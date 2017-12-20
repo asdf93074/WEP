@@ -133,7 +133,6 @@ body {
 .ChatWindow::-webkit-scrollbar-thumb {
 	border-radius: 10px;
 	background-color: #D62929;
-	
 }
 
 .message {
@@ -229,16 +228,32 @@ body {
 	color: white;
 }
 
-#TabBarList{
+#TabBarList {
 	padding-left: 0;
 	display: block;
 	text-decoration: none;
 	list-style: none;
 	width: 100%;
-	min-height: 100px;
 	height: 100%;
 	overflow-x: auto;
 	overflow-y: hidden;
+	cursor: default;
+	white-space: nowrap;
+	text-overflow: '...';
+}
+
+#TabBarList::-webkit-scrollbar-track {
+	border-radius: 10px;
+}
+
+#TabBarList::-webkit-scrollbar {
+	height: 0px;
+	background-color: #F5F5F5;
+}
+
+#TabBarList::-webkit-scrollbar-thumb {
+	border-radius: 10px;
+	background-color: #D62929;
 }
 
 #tabBar p{
