@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="webproject.css">
+</head>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.2.0/zxcvbn.js"></script>
+
+<body>
+<script type="text/javascript" src="loginpage.js"> </script>   
+
+<section class="signup">
+	<div class="title">Sign Up</div>
+
+	<form action="#" method="post" autocomplete="on">
+    	
+        <label style="padding-top:10px">Username</label>
+        <input id="username" type="text" required placeholder="Username" onkeyup="validateUsername()">
+        <p id="err1"></p>
+
+
+        <label>Email</label>
+        <input id="email" type="text" required placeholder="Email" onkeyup="validateEmail();">
+        <p id="err2"></p>
+
+        
+        <label>Password</label>
+        <input id="password" type="password" required placeholder="Password" onkeyup="checkStrength(); validatePasssword();">
+        <label style="font-size: 12px; padding-top: 10px;">Password Strength</label>
+        <meter max="4" id="password-strength-meter"></meter>
+        <label id="pstrength" style="font-size: 12px; padding-top: 0px; padding-bottom: 0px;"></label>
+        <p id="err3"></p>
+        <p id="err31"></p>
+
+ 
+        <label>Retype Password</label>
+        <input id="retype-password" type="password" required placeholder="Retype Password" onkeyup="validateRePassword()">
+        <p id="err4"></p>
+       
+
+        <a href="#" class="okay">Register</a>
+    </form>
+</section>
+
+</body>
+</html>

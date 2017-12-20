@@ -1,0 +1,144 @@
+meter {
+  /* Reset the default appearance */
+  -webkit-appearance: meter;
+  margin: 0.2em auto 1em;
+  width:100%;
+  height: 0.5em;
+}
+
+meter::-webkit-meter-bar {
+  background: none;
+  border: 1px solid #bfbfbf;
+  border-radius: 3px;
+}
+
+/* Webkit based browsers */
+meter[value="1"]::-webkit-meter-optimum-value{ border-radius: 3px;background: red; }
+meter[value="2"]::-webkit-meter-optimum-value { border-radius: 3px;background: yellow; }
+meter[value="3"]::-webkit-meter-optimum-value{ border-radius: 3px;background: orange; }
+meter[value="4"]::-webkit-meter-optimum-value { border-radius: 3px;background: green; }
+
+.login, .signup {
+    width: 300px;
+    height: 70%;
+    overflow: hidden;
+    background: #1e1e1e;
+    border-radius: 6px;
+    margin: 50px auto;
+    box-shadow: 0px 0px 50px rgba(0,0,0,.8);
+}
+
+.login .title, .signup .title{
+    height: 14px;
+    padding-top: 13px;
+    padding-bottom: 13px;
+    font-size: 14px;
+    text-align: center;
+    color: #bfbfbf;
+    font-weight: bold;
+    background: #121212;
+    border: #2d2d2d solid 1px;
+    margin-bottom: 20px;
+    border-top-right-radius: 6px;
+    border-top-left-radius: 6px;
+}
+
+.login form, .signup form {
+    width: 240px;
+    height: 100%;
+    overflow: hidden;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.login form input[type=text], .login form input[type=password], .signup form input[type=text], .signup form input[type=password]{
+    width: 200px;
+    font-size: 12px;  
+    padding-top: 14px;
+    padding-bottom: 14px;
+    padding-left: 40px;
+    color: #bfbfbf;
+    background: #141414;
+    border:none;
+}
+
+.login form input[type=text], .signup form input[type=text] {
+    border-radius: 6px;
+    border-top: #0b0b0b solid 1px;
+}
+
+.login form input[type=password],.signup form input[type=password] {
+    border-radius: 6px;
+    border-top: #0b0b0b solid 1px;
+}
+
+.login form .okay, .signup form .okay {
+    width: 240px;
+    height: 12px;
+    display: block;
+    padding-top: 14px;
+    padding-bottom: 14px;
+    border-radius: 6px;
+    border-top: #4eb2a8 1px solid;
+    border-bottom: #161616 1px solid;
+    background: #349e92;
+    text-align: center;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: bold;
+    color: #FFF;
+    text-shadow: 0 -1px #1d7464, 0 1px #7bb8b3;
+    margin-top:30px;
+    margin-bottom: 30px;
+}
+
+.login label, .signup label{
+    padding-top: 20px;
+    padding-bottom: 10px;
+    display:block;
+    font-size: 14px; 
+    color: #bfbfbf;
+    font-weight: bold;
+}
+
+#err1, #err2,  #err3,  #err31, #err4  {
+    padding-top: 13px;
+    padding-bottom: 13px;
+    display:none;
+    font-size: 14px; 
+    color: #ff9999;
+    font-weight: bold;
+}
+
+.login .other {
+    width: 240px;
+    overflow: hidden;
+    padding-top: 25px;
+    padding-bottom: 25px;
+    font-size: 12px;
+    text-align: center;
+}
+
+.login .other .col {
+    width: 50%;
+    float: left;
+}
+
+.login .other .col a {
+    color: #fff;
+    text-decoration: none;
+}
+
+html, body, div, p, a, form, label, section {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+}
+
+/* HTML5 display-role reset for older browsers */
+
+section { display: block; }
+
+body { line-height: 1; font-family:Arial; }
