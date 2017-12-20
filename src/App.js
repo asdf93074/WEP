@@ -103,13 +103,24 @@ class TabName extends Component {
 		let tabarr = [];
 		
 		for (let i = 0; i < tabs.length; i++){
-			tabarr.push(<li><p>{tabs[i].value}</p></li>);
+			tabarr.push(<p>{tabs[i].value}</p>);
 		}
 		
 		return (
-			<ul id="TabBarList">
-			{tabarr}
-			</ul>
+			<div id="TabBarList">
+				{tabarr}
+				{tabarr}
+				{tabarr}
+				{tabarr}
+				{tabarr}
+				{tabarr}
+				{tabarr}
+				{tabarr}
+				{tabarr}
+				{tabarr}
+				{tabarr}
+				{tabarr}
+			</div>
 		)
 	}
 }

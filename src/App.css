@@ -19,12 +19,12 @@ body {
 	position: absolute;
 /*	border: 2px solid lightslategray;*/
 	width: 14.5%;
-	height: 97%;
+	height: 100%;
 	background-color: #6D98BA;
-	top: 1.5%;
+	top: 0%;
 	overflow-y: auto;
 	overflow-x: hidden;
-	border-radius: 0 20px 20px 0;
+	/*border-radius: 0 20px 20px 0;*/
 }
 
 #leftColumn::-webkit-scrollbar-track {
@@ -231,14 +231,14 @@ body {
 
 #TabBarList{
 	padding-left: 0;
-	display: inline;
+	display: block;
 	text-decoration: none;
 	list-style: none;
-}
-
-#TabBarList li{
-	vertical-align: middle;
-	display: inline;
+	width: 100%;
+	min-height: 100px;
+	height: 100%;
+	overflow-x: auto;
+	overflow-y: hidden;
 }
 
 #tabBar p{
@@ -253,19 +253,18 @@ body {
 	margin-bottom: 0;
 }
 
-#tabBar li:first-child p:hover{
-	background-color: lightblue;
-	border-radius: 10px 0 0 0;
+#tabBar p:hover{
+	background-color: rgb(155, 161, 161);
 }
 
-#tabBar p:hover{
-	background-color: lightblue;
-	border-radius: inherit;
+#tabBar li:first-child p:hover{
+	border-radius: 10px 0 0 0;
 }
 
 #tabBar {
 	position: relative;
 	width: 100%;
+	height: 5%;
 	left: 0;
 	color: white;
 	font-size: 15px;
@@ -274,6 +273,7 @@ body {
 	border-bottom: 2px solid #3f3f3f;
 	border-radius: 10px 10px 0 0;
 	box-shadow: 0 5px 5px #4f4f4f;
+	overflow-x: auto;
 }
 
 .chatTab {
