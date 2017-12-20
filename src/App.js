@@ -10,7 +10,7 @@ const socket = openSocket("http://localhost:4000");
 function Message(props) {
 	var c = [];
 	for (let i = 0; i < props.data.length; i++) {
-		c.push(<div className="message"><p className="userNames">{props.data[i].username}: </p>{props.data[i].message}<p class="messageTime">Time: {props.data[i][1]}</p></div>);
+		c.push(<div className="message"><p className="userNames">{props.data[i].username}: </p>{props.data[i].message}<p class="messageTime">Time: {props.data[i].time}</p></div>);
 	}
 	return c;
 }
@@ -35,21 +35,20 @@ class RightClickMenuItems extends Component {
 }
 
 class RightClickMenu extends Component {
-	constructor(props) {
-		super(props);	
-	}
+	// constructor(props) {
+	// 	super(props);
+	// }
 	
 	render() {
+		console.log(this.props.newtab);
 		var i = ["Profile", "Message", "Ignore"];
 		var iFunctions = [];
 		iFunctions[0] = function(){
 			console.log("Profile");
 			document.getElementsByClassName("rightClickMenu")[0].style.visibility = "hidden";
 		}
-		iFunctions[1] = function(){
-			console.log("Message");
-			document.getElementsByClassName("rightClickMenu")[0].style.visibility = "hidden";
-		}
+		iFunctions[1] = this.props.newtab;
+		
 		iFunctions[2] = function(){
 			console.log("Ignore");
 			document.getElementsByClassName("rightClickMenu")[0].style.visibility = "hidden";
@@ -235,6 +234,7 @@ class App extends Component {
 		this.updatechat = this.updatechat.bind(this);
 		this.connect = this.connect.bind(this);
 		this.adduser = this.adduser.bind(this);
+		this.newTab = this.newTab.bind(this);
 	}
 	
 	componentDidMount(){
@@ -268,25 +268,22 @@ class App extends Component {
 		console.log("User: " + data.username);
 		console.log("Message: " + data.message);
 		
-		// var data_new = [data.message, new Date().toLocaleTimeString()];
-		this.state.tabs[this.state.activeTab].messages.push(data)
-		// var currentMessages = [...this.state.tabs[this.state.activeTab].messages, data_new];
-		// this.state.tabs[this.state.activeTab].messages = currentMessages;
+		const data_new = {
+			username: data.username,
+			message: data.message,
+			time: new Date().toLocaleTimeString()
+		}
+
+		this.state.tabs[this.state.activeTab].messages.push(data_new);
 		this.forceUpdate();
 	}
 
 	sendMessage = (e)=>{
 		if (e.keyCode == 13) {
 			var data = document.getElementById('chatBox').value;
-			// data = [data, new Date().toLocaleTimeString()];
 			
 			socket.emit('chat', {message: data});
 			document.getElementById('chatBox').value = '';
-
-			// var currentMessages = [...this.state.tabs[this.state.activeTab].messages, data];
-			// this.state.tabs[this.state.activeTab].messages = currentMessages;
-			// document.getElementById('chatBox').value = '';
-			// this.forceUpdate();
 		}
 	}
 	
@@ -297,7 +294,8 @@ class App extends Component {
 		};
 	}
 	
-	newTab = (e)=> {
+	newTab(){
+		console.log("new tab");
 		let l = this.state.tabs.length;
 		this.state.tabs.push({value: "Default" + l, messages: [], username: 'faust'+l});
 		this.activeTabHandler(l);
@@ -315,7 +313,7 @@ class App extends Component {
 				<div id="leftColumn">
 					<OnlinePlayers users={this.state.users.length} />
 					<PlayersList users={this.state.users} />
-					<RightClickMenu />
+					<RightClickMenu newtab={this.newTab}/>
 				</div>
 				<div id="middleColumn">
 					<div id="tabBar">
