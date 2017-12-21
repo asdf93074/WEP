@@ -256,7 +256,7 @@ class ButtonsBar extends Component {
 	render() {
 		return (<div id="ButtonsBar">
 		<div id="ButtonsBarFirst">
-		<span class="ButtonsBar-ToolTip" title="LogOut"><div onClick={this.ButtonsBarButtonClick} class="ButtonsBarButton" id="ButtonsBarSettings"><FontAwesome.FaCog size={30}/>
+		<span class="ButtonsBar-ToolTip" title="Log Out"><div onClick={this.ButtonsBarButtonClick} class="ButtonsBarButton" id="ButtonsBarLogOut"><FontAwesome.FaClose size={30}/>
 		</div></span>
 		<span class="ButtonsBar-ToolTip" title="View Profile"><div onClick={this.ButtonsBarProfileClick} class="ButtonsBarButton" id="ButtonsBarProfile"><FontAwesome.FaUser size={30}/>
 		</div></span>
