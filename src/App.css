@@ -322,6 +322,11 @@ body {
 	margin-bottom: 0;
 }
 
+.CurrentMatches {
+	width: 96%;
+	height: 15%;
+}
+
 .CurrentMatchesList {
 	list-style: none;
 	text-align: center;
@@ -341,6 +346,20 @@ body {
 	width: inherit;
 }
 
+.CurrentMatchesListContainer {
+	height: 60%;
+	overflow-y: hidden;
+	background-color: #7DA8CA;
+	border-top: 2px solid rgb(48, 88, 109);
+	border-bottom: 2px solid rgb(160, 208, 245);
+	color: white;
+}
+
+.OpenMatches {
+	width: 96%;
+	height: 15%;
+}
+
 .OpenMatchesList {
 	list-style: none;
 	text-align: center;
@@ -357,6 +376,15 @@ body {
 	top: 0px;
 	font-family: 'ansonregular';
 	width: inherit;
+}
+
+.OpenMatchesListContainer {
+	height: 60%;
+	overflow-y: hidden;
+	background-color: #7DA8CA;
+	border-top: 2px solid rgb(48, 88, 109);
+	border-bottom: 2px solid rgb(160, 208, 245);
+	color: white;
 }
 
 #playersListUserNamesContainer {
@@ -413,7 +441,6 @@ body {
 	#leftColumnButton {
 		z-index: 2;
 		position: absolute;
-		background-color: red;
 		width: 4%;
 		height: 2%;
 		top: 2%;
@@ -422,10 +449,162 @@ body {
 	#rightColumnButton {
 		z-index: 2;
 		position: absolute;
-		background-color: red;
 		right: 0%;
 		width: 4%;
 		height: 2%;
 		top: 2%;
 	}
+}
+
+#ButtonsBar {
+	padding-left: 7.5%;
+	padding-right: 7.5%;
+	background-color: #7DA8CA;
+	border-top: 1px solid #4D88AA;
+	border-bottom: 2px solid #8DB8DA;
+	padding-top: 1%;
+	padding-bottom: 1%;
+}
+
+#ButtonsBarFirst {
+	display: inline;
+}
+
+#ButtonsBarSecond {
+	display: inline;
+}
+
+.ButtonsBarButton {
+	display: inline-block;
+	cursor: pointer;
+	padding-right: 4%;
+	padding-left: 4%;
+	transition: 0.2s;
+	border-radius: 2px;
+}
+
+.ButtonsBar-ToolTip {
+	display: inline;
+	position: relative;
+	z-index: 4;
+}
+
+.ButtonsBar-ToolTip:hover:after{
+    background: #333;
+    background: rgba(0,0,0,.8);
+    border-radius: 5px;
+    bottom: 26px;
+    color: #fff;
+    content: attr(title);
+    left: -10%;
+    padding: 5px 15px;
+    position: absolute;
+    z-index: 3;
+}
+
+.ButtonsBar-ToolTip:hover:before{
+    border: solid;
+    border-color: #333 transparent;
+    border-width: 6px 6px 0 6px;
+    bottom: 20px;
+    content: "";
+    left: 35%;
+    position: absolute;
+    z-index: 99;
+}
+
+.ButtonsBarButton:hover {
+	background-color: #4D789A;
+}
+
+@media only screen and (max-width: 1432px) {
+	.ButtonsBarButton {
+		padding-left: 3%;
+		padding-right: 3%;
+	}
+
+}
+
+@media only screen and (max-width: 1284px) {
+	.ButtonsBarButton {
+		padding-left: 2%;
+		padding-right: 2%;
+	}
+
+}
+
+@media only screen and (max-width: 1158px) {
+	.ButtonsBarButton {
+		margin-left: 10%;
+		padding-left: 2%;
+		padding-right: 2%;
+	}
+
+	#ButtonsBarFirst {
+		display: block;
+	}
+
+	#ButtonsBarSecond {
+		display: block;
+	}
+
+}
+
+#overlay {
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0,0,0,0.5);
+	position: fixed;
+	z-index: -100;
+}
+
+#SettingsModal {
+	background-color: #0f0f0f;
+	width: 50%;
+	height: 50%;
+	z-index: -9999;
+	display: none;
+	position: absolute;
+	top: 25%;
+	left: 25%;
+	color: white;
+	border-radius: 10px;
+}
+
+#SettingsModal h1 {
+	text-align: center;
+}
+
+#ProfileModal {
+	background-color: #0f0f0f;
+	width: 50%;
+	height: 50%;
+	z-index: -9999;
+	display: none;
+	position: absolute;
+	top: 25%;
+	left: 25%;
+	color: white;
+	border-radius: 10px;
+}
+
+#ProfileModal h1 {
+	text-align: center;
+}
+
+#RoomsModal {
+	background-color: #0f0f0f;
+	width: 50%;
+	height: 50%;
+	z-index: -9999;
+	display: none;
+	position: absolute;
+	top: 25%;
+	left: 25%;
+	color: white;
+	border-radius: 10px;
+}
+
+#RoomsModal h1 {
+	text-align: center;
 }
