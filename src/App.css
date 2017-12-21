@@ -23,9 +23,11 @@ body {
 	height: 100%;
 	background-color: #6D98BA;
 	top: 0%;
-	overflow-y: auto;
+	overflow-y: hidden;
 	overflow-x: hidden;
 	/*border-radius: 0 20px 20px 0;*/
+	transition: width 0.5s;
+	z-index: 1;
 }
 
 #leftColumn::-webkit-scrollbar-track {
@@ -60,6 +62,7 @@ body {
 	background-color: #090809;
 	top: 1.5%;
 	color: #CCC9DC;
+	transition: width 0.5s;
 }
 
 #middleColumn {
@@ -71,6 +74,7 @@ body {
 	top: 1.5%;
 	background-color: #DEE5E5;
 	border-radius: 10px;
+	transition: 0.5s;
 }
 
 #chatBox  {
@@ -323,6 +327,7 @@ body {
 	text-align: center;
 	margin: 0;
 	padding-left: 0;
+	width: inherit;
 }
 
 #CurrentMatchesHead {
@@ -333,6 +338,7 @@ body {
 	position: sticky;
 	top: 0px;
 	font-family: 'ansonregular';
+	width: inherit;
 }
 
 .OpenMatchesList {
@@ -340,6 +346,7 @@ body {
 	text-align: center;
 	padding-left: 0;
 	margin: 0;
+	width: inherit;
 }
 
 #OpenMatchesHead {
@@ -349,6 +356,7 @@ body {
 	position: sticky;
 	top: 0px;
 	font-family: 'ansonregular';
+	width: inherit;
 }
 
 #playersListUserNamesContainer {
@@ -373,4 +381,51 @@ body {
 #ButtonContainer {
 	background-color: grey;
 	height: 8.5%;
+}
+
+@media only screen and (max-height: 530px) {
+	#TabBarList {
+		height: 26px;
+	}
+	
+	#tabBar {
+		height: 26px;
+	}
+}
+
+@media only screen and (max-width: 720px) {
+	#leftColumn {
+		width: 0px;
+	}
+	
+	#middleColumn {
+		left: 4%;
+		width: 92%;
+	}
+	
+	#rightColumn {
+		width: 0;
+		display: none;
+		border-radius: 0;
+		height: 100%;
+	}
+	
+	#leftColumnButton {
+		z-index: 2;
+		position: absolute;
+		background-color: red;
+		width: 4%;
+		height: 2%;
+		top: 2%;
+	}
+	
+	#rightColumnButton {
+		z-index: 2;
+		position: absolute;
+		background-color: red;
+		right: 0%;
+		width: 4%;
+		height: 2%;
+		top: 2%;
+	}
 }

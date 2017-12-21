@@ -5,7 +5,7 @@ import openSocket from 'socket.io-client';
 
 var q = "https://d30y9cdsu7xlg0.cloudfront.net/png/45447-200.png";
 
-const socket = openSocket("http://localhost:4000");
+const socket = openSocket("http://l92.168.43.32:4000");
 
 function Message(props) {
 	var c = [];
@@ -310,9 +310,36 @@ class App extends Component {
 		console.log(this.state.tabs);
 	}
 	
+	leftColumnButtonClick() {
+		if (document.getElementById("leftColumn").visibleState != 1) {
+			document.getElementById("leftColumn").style.width = "35%";
+			document.getElementById("leftColumn").visibleState = 1;
+		} else {
+			document.getElementById("leftColumn").style.width = "0%";
+			document.getElementById("leftColumn").visibleState = 0;
+		}
+	}
+	
+	rightColumnButtonClick() {
+		if (document.getElementById("rightColumn").visibleState != 1) {
+			document.getElementById("rightColumn").style.width = "35%";
+			document.getElementById("rightColumn").style.left = "65%";
+			document.getElementById("rightColumn").style.display = "initial";
+			document.getElementById("rightColumn").visibleState = 1;
+		} else {
+			document.getElementById("rightColumn").style.width = "0%";
+			document.getElementById("rightColumn").style.left = "65%";
+			document.getElementById("rightColumn").style.display = "none";
+			document.getElementById("rightColumn").visibleState = 0;
+		}
+		
+	}
+	
 	render() {
 		return (
 			<div onClick={this.columnContainerContextMenu} className="columnContainer">
+				<div id="leftColumnButton" onClick={this.leftColumnButtonClick}>
+				</div>
 				<div id="leftColumn">
 					<OnlinePlayers users={this.state.users.length} />
 					<PlayersList users={this.state.users} />
@@ -332,6 +359,8 @@ class App extends Component {
 				<div id="rightColumn">
 					<CurrentMatches matches={this.state.currentMatches}/>
 					<OpenMatches matches={this.state.currentMatches}/>
+				</div>
+				<div id="rightColumnButton" onClick={this.rightColumnButtonClick}>
 				</div>
 			</div>
 		);
