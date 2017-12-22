@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import openSocket from 'socket.io-client';
+import * as FontAwesome from 'react-icons/lib/fa';
 
 var q = "https://d30y9cdsu7xlg0.cloudfront.net/png/45447-200.png";
 
@@ -16,7 +17,7 @@ function Message(props) {
 }
 
 function OnlinePlayers(props) {
-	return <p id="playersListHead">Online - {props.users}</p>;
+	return <p id="playersListHead"><FontAwesome.FaUser /> Online - {props.users}</p>;
 }
 
 class RightClickMenuItems extends Component {
@@ -197,7 +198,10 @@ class CurrentMatches extends Component {
 		for (let i = 0; i < this.state.matches.length; i++) {
 			arr.push(<li className="CurrentMatch">{this.state.matches[i].matchID}</li>)
 		}
-		return (<div className="CurrentMatches"><p id="CurrentMatchesHead">Current Matches - {this.state.matches.length}</p><ul className="CurrentMatchesList">{arr}</ul></div>)
+		return (
+		<div className="CurrentMatches"><p id="CurrentMatchesHead">Current Matches - {this.state.matches.length}
+		</p><div className="CurrentMatchesListContainer"><ul className="CurrentMatchesList">{arr}</ul></div></div>
+		)
 	}
 }
 
@@ -212,10 +216,82 @@ class OpenMatches extends Component {
 		for (let i = 0; i < this.state.matches.length; i++) {
 			arr.push(<li className="OpenMatch">{this.state.matches[i].matchID}</li>)
 		}
-		return (<div className="OpenMatches"><p id="OpenMatchesHead">Open Matches - {this.state.matches.length}</p><ul className="OpenMatchesList">{arr}</ul></div>)
+		return (
+		<div className="OpenMatches"><p id="OpenMatchesHead">Open Matches - {this.state.matches.length}
+		</p><div className="OpenMatchesListContainer"><ul className="OpenMatchesList">{arr}</ul></div></div>
+		)
 	}
 }
 
+class ButtonsBar extends Component {
+	constructor(props){
+		super(props);
+		this.ButtonsBarButtonClick = this.ButtonsBarButtonClick.bind(this);
+	}
+
+	ButtonsBarButtonClick(){
+		document.getElementById("overlay").style.zIndex = 100;
+	}
+
+	ButtonsBarProfileClick = ()=>{
+		this.ButtonsBarButtonClick()
+		document.getElementById("ProfileModal").style.zIndex = 101;
+		document.getElementById("ProfileModal").style.display = "block";
+	}
+
+	ButtonsBarRoomsClick = ()=>{
+		this.ButtonsBarButtonClick()
+		document.getElementById("RoomsModal").style.zIndex = 101;
+		document.getElementById("RoomsModal").style.display = "block";
+	}
+
+	ButtonsBarSettingsClick = ()=>{
+		this.ButtonsBarButtonClick()
+		document.getElementById("SettingsModal").style.zIndex = 101;
+		document.getElementById("SettingsModal").style.display = "block";
+	}
+
+	render() {
+		return (<div id="ButtonsBar">
+		<div id="ButtonsBarFirst">
+		<span class="ButtonsBar-ToolTip" title="Log Out"><div onClick={this.ButtonsBarButtonClick} class="ButtonsBarButton" id="ButtonsBarLogOut"><FontAwesome.FaClose size={30}/>
+		</div></span>
+		<span class="ButtonsBar-ToolTip" title="View Profile"><div onClick={this.ButtonsBarProfileClick} class="ButtonsBarButton" id="ButtonsBarProfile"><FontAwesome.FaUser size={30}/>
+		</div></span>
+		</div>
+		<div id="ButtonsBarSecond">
+		<span class="ButtonsBar-ToolTip" title="Rooms"><div onClick={this.ButtonsBarRoomsClick} class="ButtonsBarButton" id="ButtonsBarRooms"><FontAwesome.FaColumns size={30}/>
+		</div></span>
+		<span class="ButtonsBar-ToolTip" title="Settings"><div onClick={this.ButtonsBarSettingsClick} class="ButtonsBarButton" id="ButtonsBarSettings"><FontAwesome.FaCog size={30}/>
+		</div></span>
+		</div>
+		</div>);
+	}
+}
+
+class SettingsModal extends Component {
+	render() {
+		return (<div id="SettingsModal">
+			<h1>Settings</h1>
+		</div>)
+	}
+}
+
+class ProfileModal extends Component {
+	render() {
+		return (<div id="ProfileModal">
+			<h1>Profile</h1>
+		</div>)
+	}
+}
+
+class RoomsModal extends Component {
+	render() {
+		return (<div id="RoomsModal">
+			<h1>Rooms</h1>
+		</div>)
+	}
+}
 
 class App extends Component {
 	constructor(props) {
@@ -342,16 +418,32 @@ class App extends Component {
 		}
 		
 	}
+
+	overlayClick(){
+		document.getElementById("overlay").style.zIndex = -100;
+		document.getElementById("SettingsModal").style.zIndex = -101;
+		document.getElementById("SettingsModal").style.display = "none";
+		document.getElementById("ProfileModal").style.zIndex = -101;
+		document.getElementById("ProfileModal").style.display = "none";
+		document.getElementById("RoomsModal").style.zIndex = -101;
+		document.getElementById("RoomsModal").style.display = "none";
+	}
 	
 	render() {
 		return (
 			<div onClick={this.columnContainerContextMenu} className="columnContainer">
+				<div id="overlay" onClick={this.overlayClick}></div>
 				<div id="leftColumnButton" onClick={this.leftColumnButtonClick}>
+					<FontAwesome.FaBars size="28" color="white" />
 				</div>
+				<SettingsModal />
+				<RoomsModal />
+				<ProfileModal />
 				<div id="leftColumn">
 					<OnlinePlayers users={this.state.users.length} />
 					<PlayersList users={this.state.users} />
 					<RightClickMenu newtab={this.newTab} selectuser={this.selectUserProfile}/>
+					<ButtonsBar />
 				</div>
 				<div id="middleColumn">
 					<div id="tabBar">
@@ -369,6 +461,7 @@ class App extends Component {
 					<OpenMatches matches={this.state.currentMatches}/>
 				</div>
 				<div id="rightColumnButton" onClick={this.rightColumnButtonClick}>
+					<FontAwesome.FaBars size="28" color="white" />
 				</div>
 			</div>
 		);
