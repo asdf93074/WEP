@@ -44,10 +44,8 @@ class RightClickMenu extends Component {
 		console.log(this.props.newtab);
 		var i = ["Profile", "Message", "Ignore"];
 		var iFunctions = [];
-		iFunctions[0] = function(){
-			console.log("Profile");
-			document.getElementsByClassName("rightClickMenu")[0].style.visibility = "hidden";
-		}
+		iFunctions[0] = this.props.selectuser;
+
 		iFunctions[1] = this.props.newtab;
 		
 		iFunctions[2] = function(){
@@ -311,6 +309,8 @@ class App extends Component {
 		this.connect = this.connect.bind(this);
 		this.adduser = this.adduser.bind(this);
 		this.newTab = this.newTab.bind(this);
+		this.selectUserProfile = this.selectUserProfile.bind(this);
+		this.columnContainerContextMenu = this.columnContainerContextMenu.bind(this);
 	}
 	
 	componentDidMount(){
@@ -365,20 +365,28 @@ class App extends Component {
 	
 	columnContainerContextMenu(e) {
 		e.persist();
+		console.log(e.target.id);
 		if (e.target.classList.value != "rightClickMenu" && e.target.classList.value != "rightClickMenuItem") {
 			document.getElementsByClassName("rightClickMenu")[0].style.visibility = "hidden";
-		};
+		}
 	}
 	
 	newTab(e){
 		console.log("ASDASDFASDF");
-		console.log(e);
+		// console.log(e);
 		
 		let l = this.state.tabs.length;
 		this.state.tabs.push({value: "Default" + l, messages: [], username: 'faust'+l});
 		document.getElementsByClassName("rightClickMenu")[0].style.visibility = "hidden";
 		this.activeTabHandler(l);
 		this.forceUpdate();
+	}
+
+	selectUserProfile(){
+		console.log("changing to block");
+		let modal = document.getElementById("userModal");
+		modal.style.display = "block";
+		document.getElementsByClassName("rightClickMenu")[0].style.visibility = "hidden";
 	}
 	
 	activeTabHandler = (e) => {
@@ -434,7 +442,7 @@ class App extends Component {
 				<div id="leftColumn">
 					<OnlinePlayers users={this.state.users.length} />
 					<PlayersList users={this.state.users} />
-					<RightClickMenu newtab={this.newTab}/>
+					<RightClickMenu newtab={this.newTab} selectuser={this.selectUserProfile}/>
 					<ButtonsBar />
 				</div>
 				<div id="middleColumn">
