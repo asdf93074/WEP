@@ -5,7 +5,7 @@ import openSocket from 'socket.io-client';
 
 var q = "https://d30y9cdsu7xlg0.cloudfront.net/png/45447-200.png";
 
-const socket = openSocket("http://l92.168.43.32:4000");
+const socket = openSocket("http://localhost:4000");
 
 function Message(props) {
 	var c = [];
@@ -43,10 +43,8 @@ class RightClickMenu extends Component {
 		console.log(this.props.newtab);
 		var i = ["Profile", "Message", "Ignore"];
 		var iFunctions = [];
-		iFunctions[0] = function(){
-			console.log("Profile");
-			document.getElementsByClassName("rightClickMenu")[0].style.visibility = "hidden";
-		}
+		iFunctions[0] = this.props.selectuser;
+
 		iFunctions[1] = this.props.newtab;
 		
 		iFunctions[2] = function(){
@@ -235,6 +233,8 @@ class App extends Component {
 		this.connect = this.connect.bind(this);
 		this.adduser = this.adduser.bind(this);
 		this.newTab = this.newTab.bind(this);
+		this.selectUserProfile = this.selectUserProfile.bind(this);
+		this.columnContainerContextMenu = this.columnContainerContextMenu.bind(this);
 	}
 	
 	componentDidMount(){
@@ -289,20 +289,28 @@ class App extends Component {
 	
 	columnContainerContextMenu(e) {
 		e.persist();
+		console.log(e.target.id);
 		if (e.target.classList.value != "rightClickMenu" && e.target.classList.value != "rightClickMenuItem") {
 			document.getElementsByClassName("rightClickMenu")[0].style.visibility = "hidden";
-		};
+		}
 	}
 	
 	newTab(e){
 		console.log("ASDASDFASDF");
-		console.log(e);
+		// console.log(e);
 		
 		let l = this.state.tabs.length;
 		this.state.tabs.push({value: "Default" + l, messages: [], username: 'faust'+l});
 		document.getElementsByClassName("rightClickMenu")[0].style.visibility = "hidden";
 		this.activeTabHandler(l);
 		this.forceUpdate();
+	}
+
+	selectUserProfile(){
+		console.log("changing to block");
+		let modal = document.getElementById("userModal");
+		modal.style.display = "block";
+		document.getElementsByClassName("rightClickMenu")[0].style.visibility = "hidden";
 	}
 	
 	activeTabHandler = (e) => {
@@ -343,7 +351,7 @@ class App extends Component {
 				<div id="leftColumn">
 					<OnlinePlayers users={this.state.users.length} />
 					<PlayersList users={this.state.users} />
-					<RightClickMenu newtab={this.newTab}/>
+					<RightClickMenu newtab={this.newTab} selectuser={this.selectUserProfile}/>
 				</div>
 				<div id="middleColumn">
 					<div id="tabBar">
