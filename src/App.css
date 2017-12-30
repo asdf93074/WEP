@@ -411,21 +411,6 @@ body {
 	height: 8.5%;
 }
 
-#userModal {
-	width: 100%;
-	height: 100%;
-	display: none;
-	position: fixed;
-	background-color: rgba(0,0,0,0.4);
-	z-index: 1;
-}
-
-#modalContent {
-	background-color: #fefefe;
-	margin: 20%;
-	padding: 20px;
-}
-
 @media only screen and (max-height: 530px) {
 	#TabBarList {
 		height: 26px;
@@ -621,5 +606,22 @@ body {
 }
 
 #RoomsModal h1 {
+	text-align: center;
+}
+
+#OtherUserModal {
+	background-color: #0f0f0f;
+	width: 50%;
+	height: 50%;
+	z-index: -9999;
+	display: none;
+	position: absolute;
+	top: 25%;
+	left: 25%;
+	color: white;
+	border-radius: 10px;	
+}
+
+#OtherUserModal h1 {
 	text-align: center;
 }

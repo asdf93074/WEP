@@ -36,15 +36,23 @@ class RightClickMenuItems extends Component {
 }
 
 class RightClickMenu extends Component {
-	// constructor(props) {
-	// 	super(props);
-	// }
+	constructor(props) {
+		super(props);
+
+		this.profileClickHandler = this.profileClickHandler.bind(this);
+	}
+
+	profileClickHandler(){
+		document.getElementById("overlay").style.zIndex = 100;
+		document.getElementById("OtherUserModal").style.zIndex = 101;
+		document.getElementById("OtherUserModal").style.display = "block";
+		document.getElementsByClassName("rightClickMenu")[0].style.visibility = "hidden";	}
 	
 	render() {
 		console.log(this.props.newtab);
 		var i = ["Profile", "Message", "Ignore"];
 		var iFunctions = [];
-		iFunctions[0] = this.props.selectuser;
+		iFunctions[0] = this.profileClickHandler;
 
 		iFunctions[1] = this.props.newtab;
 		
@@ -269,6 +277,16 @@ class ButtonsBar extends Component {
 	}
 }
 
+class OtherUserModal extends Component {
+	render() {
+		return (
+			<div id="OtherUserModal">
+				<h1>Other User Profile</h1>
+			</div>
+		)
+	}
+}
+
 class SettingsModal extends Component {
 	render() {
 		return (<div id="SettingsModal">
@@ -309,7 +327,6 @@ class App extends Component {
 		this.connect = this.connect.bind(this);
 		this.adduser = this.adduser.bind(this);
 		this.newTab = this.newTab.bind(this);
-		this.selectUserProfile = this.selectUserProfile.bind(this);
 		this.columnContainerContextMenu = this.columnContainerContextMenu.bind(this);
 	}
 	
@@ -381,13 +398,6 @@ class App extends Component {
 		this.activeTabHandler(l);
 		this.forceUpdate();
 	}
-
-	selectUserProfile(){
-		console.log("changing to block");
-		let modal = document.getElementById("userModal");
-		modal.style.display = "block";
-		document.getElementsByClassName("rightClickMenu")[0].style.visibility = "hidden";
-	}
 	
 	activeTabHandler = (e) => {
 		this.state.activeTab = e;
@@ -427,6 +437,8 @@ class App extends Component {
 		document.getElementById("ProfileModal").style.display = "none";
 		document.getElementById("RoomsModal").style.zIndex = -101;
 		document.getElementById("RoomsModal").style.display = "none";
+		document.getElementById("OtherUserModal").style.zIndex = -101;
+		document.getElementById("OtherUserModal").style.display = "none";
 	}
 	
 	render() {
@@ -439,6 +451,7 @@ class App extends Component {
 				<SettingsModal />
 				<RoomsModal />
 				<ProfileModal />
+				<OtherUserModal />
 				<div id="leftColumn">
 					<OnlinePlayers users={this.state.users.length} />
 					<PlayersList users={this.state.users} />
