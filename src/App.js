@@ -49,15 +49,13 @@ class RightClickMenu extends Component {
 		document.getElementsByClassName("rightClickMenu")[0].style.visibility = "hidden";	}
 	
 	render() {
-		console.log(this.props.newtab);
 		var i = ["Profile", "Message", "Ignore"];
 		var iFunctions = [];
 		iFunctions[0] = this.profileClickHandler;
 
-		iFunctions[1] = this.props.newtab;
+		iFunctions[1] = this.props.messageUser;
 		
 		iFunctions[2] = function(){
-			console.log("Ignore");
 			document.getElementsByClassName("rightClickMenu")[0].style.visibility = "hidden";
 		}
 		return <div className="rightClickMenu"><RightClickMenuItems items={i} itemsFunc={iFunctions}/></div>;
@@ -98,19 +96,24 @@ class PlayersList extends Component {
 class TabName extends Component {
 	constructor(props){
 		super(props);
-		
-		this.state = {
-			name: this.props.tabName,
-			tabs: this.props.tabs
-		};
+	}
+	
+	activeTabHandler(e) {
+		for (let j = 0; j < this.props.tabs.length; j++) {
+			document.getElementById(this.props.tabs[j].value).style.backgroundColor = "";
+			document.getElementById(this.props.tabs[j].value+"Data").style.zIndex = "-90";
+		}
+		document.getElementById(e).style.backgroundColor = "black";
+		document.getElementById(e+"Data").style.zIndex = 1;
+		this.props.activeTabHandler(e);
 	}
 	
 	render(){
-		let tabs = this.state.tabs;
+		let tabs = this.props.tabs;
 		let tabarr = [];
 		
 		for (let i = 0; i < tabs.length; i++){
-			tabarr.push(<p id={tabs[i].value}>{tabs[i].value}</p>);
+			tabarr.push(<p onClick={this.activeTabHandler.bind(this, tabs[i].value)} id={tabs[i].value}>{tabs[i].value}</p>);
 		}
 		
 		return (
@@ -121,6 +124,7 @@ class TabName extends Component {
 	}
 }
 
+/*
 class ChatTab extends Component {
 	constructor(props) {
 		super(props);
@@ -161,20 +165,20 @@ class ChatTabRenderer extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			tabs: props.tabs,
 			activeTabHandler: props.activeTabHandler
 					 };
 	}
 	
 	render() {
-		let t = this.state.tabs;
+		let t = this.props.tabs;
 		let tA = [];
 		for (let i = 0; i < t.length; i++) {
-			tA.push(<ChatTab activeTabHandler={this.state.activeTabHandler} value={t[i].value} target={t[i].value + "Data"} />)
+			tA.push(<TabName tabName={this.props.tabs[this.props.activeTab].value} tabs={this.props.tabs}/>)
 		}
 		return tA
 	}
 }				   
+*/
 
 class ChatWindowsRenderer extends Component {
 	constructor(props) {
@@ -262,15 +266,15 @@ class ButtonsBar extends Component {
 	render() {
 		return (<div id="ButtonsBar">
 		<div id="ButtonsBarFirst">
-		<span class="ButtonsBar-ToolTip" title="Log Out"><div onClick={this.ButtonsBarButtonClick} class="ButtonsBarButton" id="ButtonsBarLogOut"><FontAwesome.FaClose size={30}/>
+		<span className="ButtonsBar-ToolTip" title="Log Out"><div onClick={this.ButtonsBarButtonClick} className="ButtonsBarButton" id="ButtonsBarLogOut"><FontAwesome.FaClose size={30}/>
 		</div></span>
-		<span class="ButtonsBar-ToolTip" title="View Profile"><div onClick={this.ButtonsBarProfileClick} class="ButtonsBarButton" id="ButtonsBarProfile"><FontAwesome.FaUser size={30}/>
+		<span className="ButtonsBar-ToolTip" title="View Profile"><div onClick={this.ButtonsBarProfileClick} className="ButtonsBarButton" id="ButtonsBarProfile"><FontAwesome.FaUser size={30}/>
 		</div></span>
 		</div>
 		<div id="ButtonsBarSecond">
-		<span class="ButtonsBar-ToolTip" title="Rooms"><div onClick={this.ButtonsBarRoomsClick} class="ButtonsBarButton" id="ButtonsBarRooms"><FontAwesome.FaColumns size={30}/>
+		<span className="ButtonsBar-ToolTip" title="Rooms"><div onClick={this.ButtonsBarRoomsClick} className="ButtonsBarButton" id="ButtonsBarRooms"><FontAwesome.FaColumns size={30}/>
 		</div></span>
-		<span class="ButtonsBar-ToolTip" title="Settings"><div onClick={this.ButtonsBarSettingsClick} class="ButtonsBarButton" id="ButtonsBarSettings"><FontAwesome.FaCog size={30}/>
+		<span className="ButtonsBar-ToolTip" title="Settings"><div onClick={this.ButtonsBarSettingsClick} className="ButtonsBarButton" id="ButtonsBarSettings"><FontAwesome.FaCog size={30}/>
 		</div></span>
 		</div>
 		</div>);
@@ -306,13 +310,18 @@ class ProfileModal extends Component {
 class RoomsModal extends Component {
     constructor(props) {
         super(props);
-        this.state = {roomsList: this.props.roomsList};
+		this.state = {joinFunc: this.props.joinFunc};
     }
-            
+	
+	joinButtonClickHandler(e, b){
+		this.state.joinFunc(e);
+	}
+	
 	render() {
         var l = [];
-        for (let i = 0; i < this.state.roomsList.length; i++) {
-            l.push(<tr><td>this.state.roomsList[i].roomName</td><td>this.state.roomsList[i].numberOfPlayers</td></tr>);
+        for (let i = 0; i < this.props.roomsList.length; i++) {
+            l.push(<tr><td>{this.props.roomsList[i].roomName}</td><td>{this.props.roomsList[i].numberOfPlayers}</td>
+			<td className="roomJoinButton" onClick={this.joinButtonClickHandler.bind(this, this.props.roomsList[i].roomName)}>{<FontAwesome.FaPlus size="30" />}</td></tr>);
         }
         
 		return (
@@ -320,11 +329,14 @@ class RoomsModal extends Component {
                 <h1>Rooms</h1>
                 <div id="RoomsContainer">
                     <table id="RoomsTable">
-                        <tr>
-                            <th>Room Name</th>
-                            <th>Players</th>
-                        </tr>
-                        {l}
+						<tbody>
+							<tr>
+								<th>Room Name</th>
+								<th>Players</th>
+								<th>Join</th>
+							</tr>
+							{l}
+						</tbody>
                     </table>
                 </div>
             </div>
@@ -338,10 +350,12 @@ class App extends Component {
 		this.state = {
 			users: [],
 			defaultChat: "Default",
-			tabs: [{value: "Default", messages: []}],
+			tabs: [],
+			tabsNameList: [],
 			activeTab: 0,
 			currentMatches: [{matchID: "shahmir vs pasha123", startTime: new Date().toLocaleTimeString()}],
-            openMatches: [{matchID: "shahmir vs pashaadsadasdadasdsad", numberofPlayers: 5}]
+            openMatches: [{matchID: "shahmir vs pashaadsadasdadasdsad", numberofPlayers: 5}],
+			roomsList: [{roomName: "Shahmir's Room", numberOfPlayers: 2}]
 		}
 
 		this.sendMessage = this.sendMessage.bind(this);
@@ -353,7 +367,6 @@ class App extends Component {
 	}
 	
 	componentDidMount(){
-		console.log('mounted');
 		socket.on('connect', this.connect);
 		socket.on('adduser', this.adduser);
 		socket.on('updatechat', this.updatechat);
@@ -361,22 +374,18 @@ class App extends Component {
 	}
 
 	adduser(users){
-		console.log(users);
 		this.state.users = users;
-		console.log(this.state.users);
 
 		this.forceUpdate();
 	}
 	
-	roomslist(rooms){
-		console.log(rooms);
-		
+	roomslist = (rooms)=>{
+		this.setState({roomsList: rooms});
 	}
 
 	connect(){
 		var name = prompt("Enter username");
 		socket.emit('adduser', name);
-		this.state.tabs[this.state.activeTab].username = name;
 	}
 
 	updatechat(data){
@@ -389,7 +398,7 @@ class App extends Component {
 			time: new Date().toLocaleTimeString()
 		}
 
-		this.state.tabs[this.state.activeTab].messages.push(data_new);
+		this.state.tabs[this.state.tabsNameList.indexOf(data.room)].messages.push(data_new);
 		this.forceUpdate();
 	}
 
@@ -397,33 +406,30 @@ class App extends Component {
 		if (e.keyCode == 13) {
 			var data = document.getElementById('chatBox').value;
 			
-			socket.emit('chat', {message: data});
+			socket.emit('chat', {room: this.state.activeTab, message: data});
 			document.getElementById('chatBox').value = '';
 		}
 	}
 	
 	columnContainerContextMenu(e) {
 		e.persist();
-		console.log(e.target.id);
 		if (e.target.classList.value != "rightClickMenu" && e.target.classList.value != "rightClickMenuItem") {
 			document.getElementsByClassName("rightClickMenu")[0].style.visibility = "hidden";
 		}
 	}
 	
 	newTab(e){
-		console.log("ASDASDFASDF");
-		// console.log(e);
-		
-		let l = this.state.tabs.length;
-		this.state.tabs.push({value: "Default" + l, messages: [], username: 'faust'+l});
-		document.getElementsByClassName("rightClickMenu")[0].style.visibility = "hidden";
-		this.activeTabHandler(l);
-		this.forceUpdate();
+		if (this.state.tabsNameList.indexOf(e) == -1) {
+			socket.emit("roomJoin", e);
+			this.state.tabs.push({value: e, messages: []});
+			this.state.tabsNameList.push(e);
+			this.setActiveTab(e);
+			this.forceUpdate();
+		}
 	}
 	
-	activeTabHandler = (e) => {
-		this.state.activeTab = e;
-		console.log(this.state.tabs);
+	setActiveTab = (e)=>{
+		this.setState({activeTab: e});
 	}
 	
 	leftColumnButtonClick() {
@@ -463,6 +469,10 @@ class App extends Component {
 		document.getElementById("OtherUserModal").style.display = "none";
 	}
 	
+	messageUser() {
+		
+	}
+	
 	render() {
 		return (
 			<div onClick={this.columnContainerContextMenu} className="columnContainer">
@@ -471,19 +481,19 @@ class App extends Component {
 					<FontAwesome.FaBars size="28" color="white" />
 				</div>
 				<SettingsModal />
-				<RoomsModal />
+				<RoomsModal roomsList={this.state.roomsList} joinFunc={this.newTab}/>
 				<ProfileModal />
 				<OtherUserModal />
 				<div id="leftColumn">
 					<OnlinePlayers users={this.state.users.length} />
 					<PlayersList users={this.state.users} />
-					<RightClickMenu newtab={this.newTab} selectuser={this.selectUserProfile}/>
+					<RightClickMenu newtab={this.newTab} messageUser={this.messageUser}/>
 					<ButtonsBar />
 				</div>
 				<div id="middleColumn">
 					<div id="tabBar">
-						<TabName tabName={this.state.tabs[this.state.activeTab].value} tabs={this.state.tabs}/>
-					{/*<ChatTabRenderer tabs={this.state.tabs} activeTabHandler={this.activeTabHandler}/>*/}
+						<TabName tabs={this.state.tabs} activeTabHandler={this.setActiveTab} />
+						{/*<ChatTabRenderer tabs={this.state.tabs} activeTabHandler={this.activeTabHandler}/>*/}
 					</div>
 					<ChatWindowsRenderer tabs={this.state.tabs} />
 					<input type="text" id="chatBox" placeholder="Message" onKeyDown={this.sendMessage}></input>

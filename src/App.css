@@ -78,6 +78,7 @@ body {
 }
 
 #chatBox  {
+	z-index: 3;
 	font-size: 18px;
 	position: absolute;
 	/*border: 2px solid black;*/
@@ -634,4 +635,23 @@ body {
 
 #OtherUserModal h1 {
 	text-align: center;
+}
+
+#RoomsTable {
+	margin-left: 10%;
+	margin-right: 10%;
+	width: 80%;
+	cursor: default;
+}
+
+#RoomsModal table th, #RoomsModal table td {
+	width: 50%;
+}
+
+#RoomsModal table td {
+	text-align: center;
+}
+
+.roomJoinButton {
+	cursor: pointer;
 }
