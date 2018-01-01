@@ -149,6 +149,15 @@ body {
 /*	border-top: 2px solid black;*/
 }
 
+.notice {
+	padding-top: 1%;
+	overflow-x: auto;
+	font-size: 16px;
+	color: rgb(66, 80, 83);
+	padding: 5px 3%;
+/*	border-top: 2px solid black;*/
+}
+
 .messageContent {
 	display: inline;
 	background-color: lightblue;
@@ -310,7 +319,7 @@ body {
 }
 
 #ChatWindows {
-	height: 85%;
+	height: 80%;
 	width: 100%;
 	position: relative;
 }
@@ -390,6 +399,12 @@ body {
 	color: white;
 }
 
+#info {
+	width: 96%;
+	height: 15%;
+    display: block;
+}
+
 #playersListUserNamesContainer {
 	overflow-x: hidden;
 	overflow-y: auto;
@@ -412,6 +427,14 @@ body {
 #ButtonContainer {
 	background-color: grey;
 	height: 8.5%;
+}
+
+#leftColumnButton {
+	display: none;
+}
+
+#rightColumnButton {
+	display: none;
 }
 
 @media only screen and (max-height: 530px) {
@@ -444,6 +467,7 @@ body {
 	#leftColumnButton {
 		z-index: 2;
 		position: absolute;
+		display: initial;
 		width: 4%;
 		height: 2%;
 		top: 2%;
@@ -452,6 +476,7 @@ body {
 	#rightColumnButton {
 		z-index: 2;
 		position: absolute;
+		display: initial;
 		right: 0%;
 		width: 4%;
 		height: 2%;
@@ -637,6 +662,23 @@ body {
 	text-align: center;
 }
 
+#ChallengeModal{
+	background-color: #0f0f0f;
+	width: 50%;
+	height: 50%;
+	z-index: -9999;
+	display: none;
+	position: absolute;
+	top: 25%;
+	left: 25%;
+	color: white;
+	border-radius: 10px;	
+}
+
+#ChallengeModal h1 {
+	text-align: center;
+}
+
 #RoomsTable {
 	margin-left: 10%;
 	margin-right: 10%;
@@ -654,4 +696,19 @@ body {
 
 .roomJoinButton {
 	cursor: pointer;
+}
+
+#StartGameButton {
+	width: 80%;
+	background-color: lightcyan;
+	border-radius: 10px;
+	margin-left: 10%;
+	text-align: center;
+	color: black;
+	cursor: pointer;
+	padding: 3%;
+}
+
+#StartGameButton:hover {
+	background-color: rgb(205, 252, 252);
 }

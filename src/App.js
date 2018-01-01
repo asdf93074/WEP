@@ -11,7 +11,11 @@ const socket = openSocket("http://localhost:4000");
 function Message(props) {
 	var c = [];
 	for (let i = 0; i < props.data.length; i++) {
-		c.push(<div className="message"><p className="userNames">{props.data[i].username}: </p>{props.data[i].message}<p class="messageTime">Time: {props.data[i].time}</p></div>);
+		if (props.data[i].type != 'notice') {
+			c.push(<div className="message"><p className="userNames">{props.data[i].username}: </p>{props.data[i].message}<p class="messageTime">Time: {props.data[i].time}</p></div>);			
+		} else {
+			c.push(<div className="messageNotice"><p className="notice">{props.data[i].message}</p></div>);
+		}
 	}
 	return c;
 }
@@ -48,7 +52,7 @@ class RightClickMenu extends Component {
 		document.getElementsByClassName("rightClickMenu")[0].style.visibility = "hidden";	}
 	
 	render() {
-		var i = ["Profile", "Message", "Ignore"];
+		var i = ["Profile", "Message", "Ignore", "Challenge"];
 		var iFunctions = [];
 		iFunctions[0] = this.profileClickHandler;
 
@@ -58,6 +62,10 @@ class RightClickMenu extends Component {
 		
 		iFunctions[2] = function(){
 			document.getElementsByClassName("rightClickMenu")[0].style.visibility = "hidden";
+		}
+
+		iFunctions[4] = function(){
+			socket.emit("challenge", document.getElementsByClassName("rightClickMenu")[0].currentTarget);
 		}
 		return <div className="rightClickMenu"><RightClickMenuItems items={i} itemsFunc={iFunctions}/></div>;
 	}
@@ -349,18 +357,68 @@ class RoomsModal extends Component {
 	}
 }
 
+class Info extends Component {
+	constructor(props) {
+		super(props);
+	}
+
+	render() {
+		let u = this.props.username;
+		let i = this.props.info;
+		let m = "";
+		let s;
+		
+		if (this.props.check == 1) {
+			if (i[u].status == 0) {
+				m = "not in any match.";
+			} else if (i[u].status == 1) {
+				m = "signed up for a match.";
+			} else if (i[u].status == 1) {
+				m = "playing in a match.";
+			}
+			s = <p>You are currently {m}</p>;
+		} else {
+			s = <p>You are currently </p>;
+		}
+
+		return(<div id="info">{s}<br></br>
+		<div id="StartGameButton" onClick={}>Start Game</div>
+		</div>);
+	}
+}
+
+class Challenge extends Component {
+	constructor(props){
+		super(props);
+		this.state = {status: 0};
+	}
+
+	componentDidMount() {
+		socket.on("challengeRequest", (u)=>{
+			this.p = u + " has challenged you to a match."
+		})
+	}
+
+	render() {
+		return (<div id="ChallengeModal">
+			<p>{this.p}</p>
+		</div>)
+	}
+}
+
 class App extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
 			users: [],
-			defaultChat: "Default",
+			infoCheck: 0,
 			tabs: [],
 			tabsNameList: [],
 			activeTab: 0,
-			currentMatches: [{matchID: "shahmir vs pasha123", startTime: new Date().toLocaleTimeString()}],
-            openMatches: [{matchID: "shahmir vs pashaadsadasdadasdsad", numberofPlayers: 5}],
-			roomsList: [{roomName: "Shahmir's Room", numberOfPlayers: 2}]
+			currentMatches: [/*{matchID: "shahmir vs pasha123", startTime: new Date().toLocaleTimeString()}*/],
+            openMatches: [/*{matchID: "shahmir vs pashaadsadasdadasdsad", numberofPlayers: 5}*/],
+			roomsList: [],
+			info: {}
 		}
 
 		this.sendMessage = this.sendMessage.bind(this);
@@ -376,11 +434,23 @@ class App extends Component {
 		socket.on('adduser', this.adduser);
 		socket.on('updatechat', this.updatechat);
 		socket.on('roomslist', this.roomslist);
+		socket.on('userInfo', this.userInfo);
+		socket.on('userInfoUpdate', this.userInfoUpdate);
+	}
+
+	userInfo = (u)=>{
+		this.setState({info: u});
+		this.setState({infoCheck: 1});
+		this.forceUpdate();
+	}
+
+	userInfoUpdate = (u, i)=>{
+		this.state.info.u = i;
+		this.forceUpdate();
 	}
 
 	adduser(users){
 		this.state.users = users;
-
 		this.forceUpdate();
 	}
 	
@@ -390,6 +460,7 @@ class App extends Component {
 
 	connect(){
 		var name = prompt("Enter username");
+		this.state.username = name;
 		socket.emit('adduser', name);
 	}
 
@@ -398,6 +469,7 @@ class App extends Component {
 		const data_new = {
 			username: data.username,
 			message: data.message,
+			type: data.type,
 			time: new Date().toLocaleTimeString()
 		}
 		
@@ -504,6 +576,12 @@ class App extends Component {
 		this.forceUpdate();
 	}
 
+	startNewGame = ()=>{
+		if (this.state.userInfo[this.state.username].status == 0) {
+			socket.emit("newMatch");
+		}
+	}
+
 	render() {
 		return (
 			<div onClick={this.columnContainerContextMenu} className="columnContainer">
@@ -511,6 +589,7 @@ class App extends Component {
 				<div id="leftColumnButton" onClick={this.leftColumnButtonClick}>
 					<FontAwesome.FaBars size="28" color="white" />
 				</div>
+				<Challenge />
 				<SettingsModal />
 				<RoomsModal roomsList={this.state.roomsList} joinFunc={this.newTab}/>
 				<ProfileModal />
@@ -533,8 +612,9 @@ class App extends Component {
 						*/}
 				</div>
 				<div id="rightColumn">
-					<CurrentMatches matches={this.state.currentMatches}/><br></br>
-					<OpenMatches matches={this.state.openMatches}/>
+					<CurrentMatches matches={this.state.currentMatches} /><br></br>
+					<OpenMatches matches={this.state.openMatches} /><br></br>
+					<Info startNewGame={this.startNewGame} info={this.state.info} username={this.state.username} check={this.state.infoCheck}/>
 				</div>
 				<div id="rightColumnButton" onClick={this.rightColumnButtonClick}>
 					<FontAwesome.FaBars size="28" color="white" />
