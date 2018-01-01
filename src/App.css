@@ -325,6 +325,7 @@ body {
 .CurrentMatches {
 	width: 96%;
 	height: 15%;
+    display: block;
 }
 
 .CurrentMatchesList {
@@ -358,6 +359,7 @@ body {
 .OpenMatches {
 	width: 96%;
 	height: 15%;
+    display: block;
 }
 
 .OpenMatchesList {
@@ -549,6 +551,10 @@ body {
 }
 
 @media only screen and (max-width: 1158px) {
+    #playersListUserNamesContainer {
+        height: 70%;
+    }
+    
 	.ButtonsBarButton {
 		margin-left: 10%;
 		padding-left: 2%;
@@ -622,4 +628,8 @@ body {
 
 #RoomsModal h1 {
 	text-align: center;
+}
+
+.openMatch:hover {
+    background-color: grey;
 }
