@@ -304,10 +304,31 @@ class ProfileModal extends Component {
 }
 
 class RoomsModal extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {roomsList: this.props.roomsList};
+    }
+            
 	render() {
-		return (<div id="RoomsModal">
-			<h1>Rooms</h1>
-		</div>)
+        var l = [];
+        for (let i = 0; i < this.state.roomsList.length; i++) {
+            l.push(<tr><td>this.state.roomsList[i].roomName</td><td>this.state.roomsList[i].numberOfPlayers</td></tr>);
+        }
+        
+		return (
+            <div id="RoomsModal">
+                <h1>Rooms</h1>
+                <div id="RoomsContainer">
+                    <table id="RoomsTable">
+                        <tr>
+                            <th>Room Name</th>
+                            <th>Players</th>
+                        </tr>
+                        {l}
+                    </table>
+                </div>
+            </div>
+        )
 	}
 }
 
@@ -319,7 +340,8 @@ class App extends Component {
 			defaultChat: "Default",
 			tabs: [{value: "Default", messages: []}],
 			activeTab: 0,
-			currentMatches: [{matchID: "shahmir vs pasha123", startTime: new Date().toLocaleTimeString()}]
+			currentMatches: [{matchID: "shahmir vs pasha123", startTime: new Date().toLocaleTimeString()}],
+            openMatches: [{matchID: "shahmir vs pashaadsadasdadasdsad", numberofPlayers: 5}]
 		}
 
 		this.sendMessage = this.sendMessage.bind(this);
@@ -470,8 +492,8 @@ class App extends Component {
 						*/}
 				</div>
 				<div id="rightColumn">
-					<CurrentMatches matches={this.state.currentMatches}/>
-					<OpenMatches matches={this.state.currentMatches}/>
+					<CurrentMatches matches={this.state.currentMatches}/><br></br>
+					<OpenMatches matches={this.state.openMatches}/>
 				</div>
 				<div id="rightColumnButton" onClick={this.rightColumnButtonClick}>
 					<FontAwesome.FaBars size="28" color="white" />
