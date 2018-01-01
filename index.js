@@ -10,7 +10,8 @@ app.use(express.static('public'));
 
 var users = [];
 var rooms = [{roomName: 'room1', numberOfPlayers: 3}, {roomName: 'room2', numberOfPlayers: 5}, {roomName: 'room3', numberOfPlayers: 0}];
-var roomsToUsers = {'room1': [], 'room2': [], 'room3': []};
+var roomsToUsers = {'room1': {}, 'room2': {}, 'room3': {}};
+var usersToSocket = {};
 
 var io = socket(server);
 io.sockets.on('connection', (socket) => {
@@ -29,7 +30,8 @@ io.sockets.on('connection', (socket) => {
     socket.on('adduser', function(username){
 		if (username != "") {
 			console.log("NEW USER: ", username);
-			socket.username = username;
+            socket.username = username;
+            usersToSocket[username] = socket;
 			users.push(username);
 			console.log('add user event');
 			// socket.emit('updaterooms', rooms, 'room1');
@@ -46,15 +48,33 @@ io.sockets.on('connection', (socket) => {
     });
 	
 	socket.on('roomJoin', function(roomName) {
-		socket.join(roomName);
+        socket.join(roomName);
+        roomsToUsers[roomName][socket.username] = socket;
 	});
 
     socket.on('chat', function(data){
-        io.sockets.in(data.room).emit('updatechat', {
-            message: data.message,
-            username: socket.username,
-			room: data.room
-        });
+        if (usersToSocket[data.room] == undefined) {
+            io.sockets.in(data.room).emit('updatechat', {
+                message: data.message,
+                username: socket.username,
+                room: data.room
+            });
+        } else {
+            let m = data.message;
+            let u = data.room;
+    
+            data.type = 'pm';
+            data.username = socket.username;
+
+            socket.emit('updatechat', data);
+
+            let targetSocket = usersToSocket[u];
+            data.room = data.username;
+            console.log(data);
+            console.log(socket.username, " SENDING TO ", targetSocket.username);
+            targetSocket.emit('updatechat', data);
+        }
+        
         // io.sockets.emit('chat', data);
     });
 

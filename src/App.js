@@ -38,7 +38,6 @@ class RightClickMenuItems extends Component {
 class RightClickMenu extends Component {
 	constructor(props) {
 		super(props);
-
 		this.profileClickHandler = this.profileClickHandler.bind(this);
 	}
 
@@ -53,7 +52,9 @@ class RightClickMenu extends Component {
 		var iFunctions = [];
 		iFunctions[0] = this.profileClickHandler;
 
-		iFunctions[1] = this.props.messageUser;
+		iFunctions[1] = ()=>{
+			this.props.messageUser(document.getElementsByClassName("rightClickMenu")[0].currentTarget);
+		}
 		
 		iFunctions[2] = function(){
 			document.getElementsByClassName("rightClickMenu")[0].style.visibility = "hidden";
@@ -71,6 +72,7 @@ class PlayersList extends Component {
 	rightClickHandler(e) {
 		e.persist();
 		e.preventDefault();
+		document.getElementsByClassName("rightClickMenu")[0].currentTarget = e.target.textContent;
 		document.getElementsByClassName("rightClickMenu")[0].style.visibility = "visible";
 		if (e.clientX + document.getElementsByClassName("rightClickMenu")[0].clientWidth - 1 > window.innerWidth) {
 			document.getElementsByClassName("rightClickMenu")[0].style.left = "";
@@ -100,11 +102,14 @@ class TabName extends Component {
 	
 	activeTabHandler(e) {
 		for (let j = 0; j < this.props.tabs.length; j++) {
-			document.getElementById(this.props.tabs[j].value).style.backgroundColor = "";
+			if (document.getElementById(this.props.tabs[j].value).unread != 1) {
+				document.getElementById(this.props.tabs[j].value).style.backgroundColor = "";
+			}
 			document.getElementById(this.props.tabs[j].value+"Data").style.zIndex = "-90";
 		}
 		document.getElementById(e).style.backgroundColor = "black";
 		document.getElementById(e+"Data").style.zIndex = 1;
+		document.getElementById(e).unread = 0;
 		this.props.activeTabHandler(e);
 	}
 	
@@ -389,17 +394,29 @@ class App extends Component {
 	}
 
 	updatechat(data){
-		console.log("User: " + data.username);
-		console.log("Message: " + data.message);
-		
+		console.log(data);
 		const data_new = {
 			username: data.username,
 			message: data.message,
 			time: new Date().toLocaleTimeString()
 		}
-
-		this.state.tabs[this.state.tabsNameList.indexOf(data.room)].messages.push(data_new);
-		this.forceUpdate();
+		
+		if (this.state.tabsNameList.indexOf(data.room) != -1) {
+			if (data.room != this.state.activeTab) {
+				document.getElementById(data.room).style.backgroundColor = "#F1C40F";
+				document.getElementById(data.room).unread = 1;
+			}
+			this.state.tabs[this.state.tabsNameList.indexOf(data.room)].messages.push(data_new);
+			this.forceUpdate();
+		} else if (data.type == 'pm') {
+			this.newTabPM(data.username);
+			if (data.room != this.state.activeTab) {
+				document.getElementById(data.room).style.backgroundColor = "#F1C40F";
+				document.getElementById(data.room).unread = 1;
+			}
+			this.state.tabs[this.state.tabsNameList.indexOf(data.room)].messages.push(data_new);
+			this.forceUpdate();
+		}
 	}
 
 	sendMessage = (e)=>{
@@ -418,9 +435,18 @@ class App extends Component {
 		}
 	}
 	
-	newTab(e){
+	newTab(e) {
 		if (this.state.tabsNameList.indexOf(e) == -1) {
 			socket.emit("roomJoin", e);
+			this.state.tabs.push({value: e, messages: []});
+			this.state.tabsNameList.push(e);
+			this.setActiveTab(e);
+			this.forceUpdate();
+		}
+	}
+
+	newTabPM(e) {
+		if (this.state.tabsNameList.indexOf(e) == -1 ) {
 			this.state.tabs.push({value: e, messages: []});
 			this.state.tabsNameList.push(e);
 			this.setActiveTab(e);
@@ -469,10 +495,15 @@ class App extends Component {
 		document.getElementById("OtherUserModal").style.display = "none";
 	}
 	
-	messageUser() {
-		
+	messageUser = (e)=>{
+		if (this.state.tabsNameList.indexOf(e) == -1) {
+			this.state.tabs.push({value: e, messages: []});
+			this.state.tabsNameList.push(e);
+		}
+		this.setActiveTab(e);
+		this.forceUpdate();
 	}
-	
+
 	render() {
 		return (
 			<div onClick={this.columnContainerContextMenu} className="columnContainer">
