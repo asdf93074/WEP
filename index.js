@@ -67,7 +67,7 @@ io.sockets.on('connection', (socket) => {
 	socket.on('roomJoin', function(roomName) {
         socket.join(roomName);
 		console.log(socket.username," JOINED ",socket.room);
-		roomsToUsers[roomName].push(socket.username);
+        roomsToUsers[roomName].push(socket.username);
 		socket.emit('updatechat', {message: "Welcome to DoubleDamage, a Dota 2 league.", username: "DDBot", room: roomName, type: "notice"});
 		socket.emit('updateUserList', roomsToUsers[roomName], roomName);
 	});
@@ -85,6 +85,7 @@ io.sockets.on('connection', (socket) => {
     
             data.type = 'pm';
             data.username = socket.username;
+            data.users = [socket.username, u];
 
             socket.emit('updatechat', data);
 

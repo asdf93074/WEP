@@ -443,6 +443,7 @@ class App extends Component {
 		socket.on('roomslist', this.roomslist);
 		socket.on('userInfo', this.userInfo);
 		socket.on('userInfoUpdate', this.userInfoUpdate);
+		socket.on('updateUserList', this.updateUserList);
 	}
 
 	userInfo = (u)=>{
@@ -509,7 +510,6 @@ class App extends Component {
 	}
 	
 	updateUserList = (list, room)=>{
-		console.log(list, room);
 		this.state.tabs[this.state.tabsNameList.indexOf(room)].users = list;
 		if (this.state.activeTab == room) {
 			this.setActiveTab(room);	
@@ -536,8 +536,9 @@ class App extends Component {
 	}
 	
 	setActiveTab = (e)=>{
-		this.setState({activeTab: e});
-		this.setState({users: this.state.tabs[this.state.tabsNameList.indexOf(this.state.activeTab)].users});
+		this.setState({activeTab: e}, function() {
+			this.setState({users: this.state.tabs[this.state.tabsNameList.indexOf(this.state.activeTab)].users});
+		});
 	}
 	
 	leftColumnButtonClick() {
@@ -579,7 +580,7 @@ class App extends Component {
 	
 	messageUser = (e)=>{
 		if (this.state.tabsNameList.indexOf(e) == -1) {
-			this.state.tabs.push({value: e, messages: []});
+			this.state.tabs.push({value: e, messages: [], users: [e, this.state.username]});
 			this.state.tabsNameList.push(e);
 		}
 		this.setActiveTab(e);
