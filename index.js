@@ -1,5 +1,8 @@
 var express = require('express');
 var socket = require('socket.io');
+var pg = require('pg');
+
+var connect = "pg://postgres:postgres@localhost:5432/newdb";
 
 var app = express();
 var server = app.listen(4000, '0.0.0.0', function(){
@@ -7,6 +10,9 @@ var server = app.listen(4000, '0.0.0.0', function(){
 });
 
 app.use(express.static('public'));
+
+var client = new pg.Client(connect);
+client.connect();
 
 var users = [];
 var rooms = [{roomName: 'room1', numberOfPlayers: 3}, {roomName: 'room2', numberOfPlayers: 5}, {roomName: 'room3', numberOfPlayers: 0}];
@@ -16,6 +22,31 @@ var userInfo = {};
 var openMatches = [];
 var currentMatches = [];
 
+function insertDetails(matchid, chal, opp, chalteam, oppteam, winner, avgscra, avgscrb){
+    client.query(
+        "INSERT INTO \"Match\"(\"MatchID\", \"Challenger\", \"Opponent\", \"ChallengerTeam\", \"OpponentTeam\", \"Winner\", \"AvgScoreTeamA\", \"AvgScoreTeamB\") values($1, $2, $3, $4, $5, $6, $7, $8)",
+        [matchid, chal, opp, chalteam, oppteam, winner, avgscra, avgscrb]
+    );
+}
+
+function getUsers(){
+    client.query("SELECT * FROM \"User\"", (err, res) => {
+        if (err){
+            console.log("Error connecting");
+        }
+        else{
+            var retusers = [];
+            for (var i = 0; i < res.rows.length; i++){
+                retusers.push(res.rows[i].Username);
+            }
+            users = users.concat(retusers);
+            // console.log(users);
+        }
+    });    
+}
+
+getUsers();
+
 var io = socket(server);
 io.sockets.on('connection', (socket) => {
 
@@ -23,6 +54,8 @@ io.sockets.on('connection', (socket) => {
     socket.room = 'room1';
 	
     socket.emit('roomslist', rooms);
+
+    console.log(users);
 
 	socket.on('disconnect', function(){
 		console.log("USER DISCONNECTED: ", socket.username);
