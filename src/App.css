@@ -675,17 +675,17 @@ body {
 #ChallengeModal{
 	background-color: #0f0f0f;
 	width: 50%;
-	height: 50%;
+	min-height: 20%;
 	z-index: -9999;
 	display: none;
 	position: absolute;
 	top: 25%;
 	left: 25%;
 	color: white;
-	border-radius: 10px;	
+	border-radius: 10px;
 }
 
-#ChallengeModal h1 {
+#ChallengeModal h3 {
 	text-align: center;
 }
 
@@ -721,4 +721,8 @@ body {
 
 #StartGameButton:hover {
 	background-color: rgb(205, 252, 252);
+}
+
+.noticeOptions {
+	cursor: pointer;
 }

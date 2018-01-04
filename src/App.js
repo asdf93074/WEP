@@ -14,8 +14,10 @@ function Message(props) {
 		if (props.data[i].type == 'notice') {
 			c.push(<div className="messageNotice"><p className="notice">{props.data[i].message}</p></div>);
 		} else if (props.data[i].type == 'challengeNotice'){
-			c.push(<div className="messageNotice"><p className="notice">[PRIVATE] {props.data[i].message}<p className="noticeOptions" id="noticeOptionAccept">Accept</p>
-			/<p className="noticeOptions" id="noticeOptionDecline">Decline</p></p></div>);
+			console.log(props.data[i]);
+			c.push(<div className="messageNotice"><p className="notice">[PRIVATE] {props.data[i].message}
+			<span onClick={()=>{socket.emit("challengeAccept", props.data[i].opp)}}><p className="noticeOptions" id="noticeOptionAccept">Accept</p></span>
+			/<span onClick={()=>{socket.emit("challengeReject", props.data[i].opp)}}><p className="noticeOptions" id="noticeOptionDecline">Decline</p></span></p></div>);
 		} else {
 			c.push(<div className="message"><p className="userNames">{props.data[i].username}: </p>{props.data[i].message}<p class="messageTime">Time: {props.data[i].time}</p></div>);			
 
@@ -401,6 +403,7 @@ class Challenge extends Component {
 
 	componentDidMount() {
 		socket.on("challengeError", (u)=>{
+			console.log(u);
 			this.setState({p: u});
 			document.getElementById("overlay").style.zIndex = 100;
 			document.getElementById("ChallengeModal").style.zIndex = 101;
@@ -410,7 +413,7 @@ class Challenge extends Component {
 
 	render() {
 		return (<div id="ChallengeModal">
-			<p>{this.p}</p>
+			<h3>{this.state.p}</h3>
 		</div>)
 	}
 }
@@ -444,6 +447,12 @@ class App extends Component {
 		socket.on('userInfo', this.userInfo);
 		socket.on('userInfoUpdate', this.userInfoUpdate);
 		socket.on('updateUserList', this.updateUserList);
+		socket.on('openMatches', this.updateOpenMatches);
+	}
+
+	updateOpenMatches = (obj)=>{
+		console.log(obj);
+		this.setState({openMatches: obj});
 	}
 
 	userInfo = (u)=>{
@@ -472,7 +481,8 @@ class App extends Component {
 			username: data.username,
 			message: data.message,
 			type: data.type,
-			time: new Date().toLocaleTimeString()
+			time: new Date().toLocaleTimeString(),
+			opp: data.opp
 		}
 		
 		if (this.state.tabsNameList.indexOf(data.room) != -1) {
@@ -576,6 +586,8 @@ class App extends Component {
 		document.getElementById("RoomsModal").style.display = "none";
 		document.getElementById("OtherUserModal").style.zIndex = -101;
 		document.getElementById("OtherUserModal").style.display = "none";
+		document.getElementById("ChallengeModal").style.zIndex = -101;
+		document.getElementById("ChallengeModal").style.display = "none";
 	}
 	
 	messageUser = (e)=>{
