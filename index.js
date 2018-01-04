@@ -16,7 +16,7 @@ client.connect();
 
 var users = [];
 var rooms = [{roomName: 'room1', numberOfPlayers: 3}, {roomName: 'room2', numberOfPlayers: 5}, {roomName: 'room3', numberOfPlayers: 0}];
-var roomsToUsers = {'room1': {}, 'room2': {}, 'room3': {}};
+var roomsToUsers = {'room1': [], 'room2': [], 'room3': []};
 var usersToSocket = {};
 var userInfo = {};
 var openMatches = [];
@@ -47,6 +47,13 @@ function getUsers(){
 
 getUsers();
 
+var challengeErrorMessgages = {
+	0: "No error",
+	1: "That user is already in a challenge",
+	2: "That user is already playing in a game",
+	3: "That user is already playing in a game"
+};
+
 var io = socket(server);
 io.sockets.on('connection', (socket) => {
 
@@ -69,7 +76,6 @@ io.sockets.on('connection', (socket) => {
 			console.log("NEW USER: ", username);
             socket.username = username;
             usersToSocket[username] = socket;
-            users.push(username);
             if (userInfo[username] == undefined) {
                 var i = {};
                 i.online = 1;
@@ -79,8 +85,8 @@ io.sockets.on('connection', (socket) => {
             }
 			// socket.emit('updaterooms', rooms, 'room1');
 		}
-        io.sockets.in(socket.room).emit('adduser', users);
-        socket.emit('userInfo', userInfo);
+        //io.sockets.in(socket.room).emit('adduser', users);
+        //socket.emit('userInfo', userInfo);
     });
 
     socket.on('changeroom', function(newroom){
@@ -93,8 +99,10 @@ io.sockets.on('connection', (socket) => {
 	
 	socket.on('roomJoin', function(roomName) {
         socket.join(roomName);
-        socket.emit('updatechat', {message: "Welcome to DoubleDamage, a Dota 2 league.", username: "DDBot", room: roomName, type: "notice"});
-        roomsToUsers[roomName][socket.username] = socket;
+		console.log(socket.username," JOINED ",socket.room);
+        roomsToUsers[roomName].push(socket.username);
+		socket.emit('updatechat', {message: "Welcome to DoubleDamage, a Dota 2 league.", username: "DDBot", room: roomName, type: "notice"});
+		socket.emit('updateUserList', roomsToUsers[roomName], roomName);
 	});
 
     socket.on('chat', function(data){
@@ -110,6 +118,7 @@ io.sockets.on('connection', (socket) => {
     
             data.type = 'pm';
             data.username = socket.username;
+            data.users = [socket.username, u];
 
             socket.emit('updatechat', data);
 
@@ -129,12 +138,13 @@ io.sockets.on('connection', (socket) => {
     });
 
     socket.on('challenge', function(u){
+		console.log("NEW CHALLENGE FROM ", socket.username, u);
         if (userInfo[u].status == 0) {
             let t = usersToSocket[u];
 
-            t.emit("challengeRequest", socket.username);
+			t.emit('updatechat', {message: socket.username + " has challenged you to a match.", username: "DDBot", room: socket.room, type: "challengeNotice"});
         } else {
-            socket.emit('challengeReply', 2);
+            socket.emit('challengeError', challengeErrorMessgages[userInfo[u].status]);
         }
     })
 
