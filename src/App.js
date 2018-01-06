@@ -1,3 +1,4 @@
+ 
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
@@ -11,10 +12,14 @@ const socket = openSocket("http://localhost:4000");
 function Message(props) {
 	var c = [];
 	for (let i = 0; i < props.data.length; i++) {
-		if (props.data[i].type != 'notice') {
-			c.push(<div className="message"><p className="userNames">{props.data[i].username}: </p>{props.data[i].message}<p class="messageTime">Time: {props.data[i].time}</p></div>);			
-		} else {
+		if (props.data[i].type == 'notice') {
 			c.push(<div className="messageNotice"><p className="notice">{props.data[i].message}</p></div>);
+		} else if (props.data[i].type == 'challengeNotice'){
+			c.push(<div className="messageNotice"><p className="notice">[PRIVATE] {props.data[i].message}<p className="noticeOptions" id="noticeOptionAccept">Accept</p>
+			/<p className="noticeOptions" id="noticeOptionDecline">Decline</p></p></div>);
+		} else {
+			c.push(<div className="message"><p className="userNames">{props.data[i].username}: </p>{props.data[i].message}<p class="messageTime">Time: {props.data[i].time}</p></div>);			
+
 		}
 	}
 	return c;
@@ -58,14 +63,16 @@ class RightClickMenu extends Component {
 
 		iFunctions[1] = ()=>{
 			this.props.messageUser(document.getElementsByClassName("rightClickMenu")[0].currentTarget);
+			document.getElementsByClassName("rightClickMenu")[0].style.visibility = "hidden";
 		}
 		
 		iFunctions[2] = function(){
 			document.getElementsByClassName("rightClickMenu")[0].style.visibility = "hidden";
 		}
 
-		iFunctions[4] = function(){
+		iFunctions[3] = function(){
 			socket.emit("challenge", document.getElementsByClassName("rightClickMenu")[0].currentTarget);
+			document.getElementsByClassName("rightClickMenu")[0].style.visibility = "hidden";
 		}
 		return <div className="rightClickMenu"><RightClickMenuItems items={i} itemsFunc={iFunctions}/></div>;
 	}
@@ -382,7 +389,7 @@ class Info extends Component {
 		}
 
 		return(<div id="info">{s}<br></br>
-		<div id="StartGameButton" onClick={}>Start Game</div>
+		<div id="StartGameButton">Start Game</div>
 		</div>);
 	}
 }
@@ -390,12 +397,15 @@ class Info extends Component {
 class Challenge extends Component {
 	constructor(props){
 		super(props);
-		this.state = {status: 0};
+		this.state = {p: ""};
 	}
 
 	componentDidMount() {
-		socket.on("challengeRequest", (u)=>{
-			this.p = u + " has challenged you to a match."
+		socket.on("challengeError", (u)=>{
+			this.setState({p: u});
+			document.getElementById("overlay").style.zIndex = 100;
+			document.getElementById("ChallengeModal").style.zIndex = 101;
+			document.getElementById("ChallengeModal").style.display = "block";
 		})
 	}
 
@@ -424,18 +434,23 @@ class App extends Component {
 		this.sendMessage = this.sendMessage.bind(this);
 		this.updatechat = this.updatechat.bind(this);
 		this.connect = this.connect.bind(this);
-		this.adduser = this.adduser.bind(this);
 		this.newTab = this.newTab.bind(this);
 		this.columnContainerContextMenu = this.columnContainerContextMenu.bind(this);
 	}
 	
 	componentDidMount(){
-		socket.on('connect', this.connect);
-		socket.on('adduser', this.adduser);
+		fetch('/user')
+			.then(res => res.json())
+			.then(user => this.state.username = user);
+
+		socket.emit('adduser', this.state.username);
+
+		// socket.on('connect', this.connect);
 		socket.on('updatechat', this.updatechat);
 		socket.on('roomslist', this.roomslist);
 		socket.on('userInfo', this.userInfo);
 		socket.on('userInfoUpdate', this.userInfoUpdate);
+		socket.on('updateUserList', this.updateUserList);
 	}
 
 	userInfo = (u)=>{
@@ -446,11 +461,6 @@ class App extends Component {
 
 	userInfoUpdate = (u, i)=>{
 		this.state.info.u = i;
-		this.forceUpdate();
-	}
-
-	adduser(users){
-		this.state.users = users;
 		this.forceUpdate();
 	}
 	
@@ -465,7 +475,6 @@ class App extends Component {
 	}
 
 	updatechat(data){
-		console.log(data);
 		const data_new = {
 			username: data.username,
 			message: data.message,
@@ -507,10 +516,17 @@ class App extends Component {
 		}
 	}
 	
+	updateUserList = (list, room)=>{
+		this.state.tabs[this.state.tabsNameList.indexOf(room)].users = list;
+		if (this.state.activeTab == room) {
+			this.setActiveTab(room);	
+		}
+	}
+	
 	newTab(e) {
 		if (this.state.tabsNameList.indexOf(e) == -1) {
 			socket.emit("roomJoin", e);
-			this.state.tabs.push({value: e, messages: []});
+			this.state.tabs.push({value: e, messages: [], users: []});
 			this.state.tabsNameList.push(e);
 			this.setActiveTab(e);
 			this.forceUpdate();
@@ -519,7 +535,7 @@ class App extends Component {
 
 	newTabPM(e) {
 		if (this.state.tabsNameList.indexOf(e) == -1 ) {
-			this.state.tabs.push({value: e, messages: []});
+			this.state.tabs.push({value: e, messages: [], users: []});
 			this.state.tabsNameList.push(e);
 			this.setActiveTab(e);
 			this.forceUpdate();
@@ -527,7 +543,9 @@ class App extends Component {
 	}
 	
 	setActiveTab = (e)=>{
-		this.setState({activeTab: e});
+		this.setState({activeTab: e}, function() {
+			this.setState({users: this.state.tabs[this.state.tabsNameList.indexOf(this.state.activeTab)].users});
+		});
 	}
 	
 	leftColumnButtonClick() {
@@ -569,7 +587,7 @@ class App extends Component {
 	
 	messageUser = (e)=>{
 		if (this.state.tabsNameList.indexOf(e) == -1) {
-			this.state.tabs.push({value: e, messages: []});
+			this.state.tabs.push({value: e, messages: [], users: [e, this.state.username]});
 			this.state.tabsNameList.push(e);
 		}
 		this.setActiveTab(e);
