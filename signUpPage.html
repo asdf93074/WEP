@@ -1,3 +1,4 @@
+ 
 <!DOCTYPE html>
 <html>
 <head>
@@ -52,7 +53,7 @@
 <section class="col-sm-10 col-md-8 col-lg-6 signup">
 
     <div class="title">Sign Up</div>
-    <form id="loginForm" action="#" method="post" autocomplete="on">
+    <form id="loginForm" action="/signuprequest" method="post" autocomplete="on">
         
         <div class="external-signup">
             <label class="social"><i>with your social network</i></label>
@@ -94,7 +95,7 @@
         <div class="localsignup">    
             <!--<div class="form-group has-feedback">-->
                 <label><span style="display:inline" class="glyphicon glyphicon-user"></span>Username</label>
-                <input id="username" class="col-sm-10 col-md-10 col-lg-12 form-control" type="text" required placeholder="Username" onkeyup="validateUsername()">
+                <input id="username" name="username" class="col-sm-10 col-md-10 col-lg-12 form-control" type="text" required placeholder="Username" onkeyup="validateUsername()">
                 <!--<span class="form-control-feedback glyphicon glyphicon-ok"></span>-->
             <!--/div>-->
                 <br>
@@ -135,16 +136,16 @@
 
             <label><span class="glyphicon glyphicon-envelope"></span>Email</label>
              <a ahref="#" data-toggle="tooltip" title="Enter your email here.">
-                <input class="col-sm-10 col-md-10 col-lg-12" id="email" type="text" required placeholder="Email" onkeyup="validateEmail();">
+                <input class="col-sm-10 col-md-10 col-lg-12" id="email" name="email" type="text" required placeholder="Email" onkeyup="validateEmail();">
             </a>
             <p id="err2"></p>
 
-
+            
 
             <br><br>
             <label><span class="glyphicon glyphicon-lock"></span>Password</label>
             <a ahref="#" data-toggle="tooltip" title="Select a password here.">
-                <input class="col-sm-10 col-md-10 col-lg-12" id="password" type="password" required placeholder="Password" onkeyup="checkStrength(); validatePasssword();">
+                <input class="col-sm-10 col-md-10 col-lg-12" id="password" name="password" type="password" required placeholder="Password" onkeyup="checkStrength(); validatePasssword();">
             </a>
             <br> <br>
             <label style="font-size: 12px; padding-top: 10px;">Password Strength</label>
@@ -160,16 +161,12 @@
             </a>
             <p id="err4"></p>
            
-<br><br>
-            <a href="#" class="okay">Register</a> 
-        </div><!--End class local sign up-->
+            <br><br>
+            <!-- <a href="#" class="okay">Register</a>  -->
+            <input type="submit">
+        </div>
     </form>
 </section>
 <section class="col-sm-1 col-md-2 col-lg-3"></section>
 </body>
 </html>
-<!--Client Id:641965152291-qol5pm47g3blhkk78emoh6h60ahr5sne.apps.googleusercontent.com-->
-<!--Client Secret: w3bxc7Kt_aYEpwzQegAW2EJl -->
-<!--Project Name: My Project 60354-->
-<!--Project Id: awesome-delight-189721-->
-<!---->

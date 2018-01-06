@@ -1,19 +1,92 @@
 var express = require('express');
 var socket = require('socket.io');
+var bodyParser = require('body-parser');
 var pg = require('pg');
+<<<<<<< HEAD
 var rs = require('randomstring');
+=======
+var router = express.Router();
+>>>>>>> c50fd5b6a7108fd1d442266c16e8ef536bfbf9d3
 
-var connect = "pg://postgres:postgres@localhost:5432/newdb";
+var connect = "pg://postgres:postgres@localhost:5432/reactapp";
 
 var app = express();
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json({type: function(req) {
+       return req.headers['content-type'] === '*/*; charset=UTF-8'
+}}));
+
+// app.use(function(req, res, next) {
+//     res.header("Access-Control-Allow-Origin", "*");
+//     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+//     next();
+// });
+// var router = express.Router();
+
 var server = app.listen(4000, '0.0.0.0', function(){
     console.log('listening for requests on port 4000,');
 });
 
-app.use(express.static('public'));
+// app.use('/', router);
 
 var client = new pg.Client(connect);
 client.connect();
+
+app.use(express.static(__dirname));
+
+app.get('/login', function(req, res){
+    res.sendFile(__dirname + '/loginpage.html'); 
+});
+
+app.get('/signup', function(req, res){
+    res.sendFile(__dirname + '/signUpPage.html');
+});
+
+app.post('/signuprequest', function(req, res){
+    if(!(/^[A-Za-z0-9\_.]+[@]+[A-Za-z0-9]+[.]+[A-Za-z0-9]/.test(req.body.email))){
+        res.redirect('/signup');
+    }
+    else if(!(req.body.password.length<6 || req.body.password.length>24)){
+        res.redirect('/signup')
+    }
+    else if(!(/[a-z]/.test(req.body.password)   &&   /[A-Z]/.test(req.body.password)   &&  /[0-9]/.test(req.body.password))){
+        res.redirect('/signup');
+    }
+    
+    else{
+        client.query(
+            "INSERT INTO usertable (email, username, password, steamid) VALUES ($1, $2, $3, $4)",
+            [req.body.email, req.body.username, req.body.password, Math.floor(Math.random()*1000)]
+        );
+        res.redirect('/login');    
+    }
+});
+
+app.post('/loginrequest', function(req, res1){
+    client.query(
+        "SELECT * FROM usertable where username like '" + req.body.username + "' and password like '" + req.body.password + "'", (err, res) => {
+            if (err){
+                console.log(err);
+            }
+            else{
+                if (res.rows.length == 0){
+                    res1.redirect('/login');
+                }
+                else{
+                    res1.redirect('/');
+                }
+            }
+        }
+    )
+});
+
+app.get('/', function(req, res){
+    // res.json(
+    //     {username: "blah"}
+    // );
+    res.sendFile(__dirname + '/public/index.html');
+});
 
 var users = [];
 var rooms = [{roomName: 'room1', numberOfPlayers: 0}, {roomName: 'room2', numberOfPlayers: 0}, {roomName: 'room3', numberOfPlayers: 0}];
@@ -27,13 +100,13 @@ var retusers = [];
 
 function insertDetails(matchid, chal, opp, chalteam, oppteam, winner, avgscra, avgscrb){
     client.query(
-        "INSERT INTO \"Match\"(\"MatchID\", \"Challenger\", \"Opponent\", \"ChallengerTeam\", \"OpponentTeam\", \"Winner\", \"AvgScoreTeamA\", \"AvgScoreTeamB\") values($1, $2, $3, $4, $5, $6, $7, $8)",
-        [matchid, chal, opp, chalteam, oppteam, winner, avgscra, avgscrb]
+        "INSERT INTO match(id, challenger, opponent, averagescorea, averagescoreb, challengerteam, opponentteam, winner) values($1, $2, $3, $4, $5, $6, $7, $8)",
+        [matchid, chal, opp, avgscra, avgscrb, chalteam, oppteam, winner]
     );
 }
 
 function getUsers(){
-    client.query("SELECT * FROM \"User\"", (err, res) => {
+    client.query("SELECT * FROM usertable", (err, res) => {
         if (err){
             console.log("Error connecting");
         }
@@ -190,6 +263,7 @@ io.sockets.on('connection', (socket) => {
         }
     })
 
+<<<<<<< HEAD
     socket.on('challengeAccept', function(o){
         userIsFree(o,
         ()=>{
@@ -228,3 +302,7 @@ io.sockets.on('connection', (socket) => {
         )
     })
 });
+=======
+});
+ 
+>>>>>>> c50fd5b6a7108fd1d442266c16e8ef536bfbf9d3

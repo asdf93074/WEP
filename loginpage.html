@@ -1,3 +1,4 @@
+ 
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,20 +11,21 @@
 
 <section class="login">
 	<div class="title">User Login</div>
-	<form action="#" method="post">
+	<form action="/loginrequest" method="post">
     	
         <label>Username</label>
-        <input type="text" required placeholder="Username">
+        <input type="text" id="username" name="username" required placeholder="Username">
         
         <label>Password</label>
-        <input type="password" required placeholder="Password">
+        <input type="password" id="password" name="password" required placeholder="Password">
         
         <div class="other">
-        	<div class="col"><a href="#">Sign Up</a></div>
+        	<div class="col"><a href="/signup">Sign Up</a></div>
             <div class="col"><a href="#">Forgot Password?</a></div>
         </div>
         
-        <a href="#" class="okay">Sign In</a>
+        <!-- <a href="#" class="okay">Sign In</a> -->
+        <input type="submit">
     </form>
 </section>
 

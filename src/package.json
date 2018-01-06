@@ -1,0 +1,29 @@
+{
+    "name": "my-app",
+    "version": "0.1.0",
+    "private": true,
+    "dependencies": {
+      "body-parser": "^1.18.2",
+      "express": "^4.15.2",
+      "pg": "^7.4.0",
+      "react": "^16.0.0",
+      "react-dom": "^16.0.0",
+      "react-icons": "^2.2.7",
+      "react-scripts": "1.0.17",
+      "socket.io": "^2.0.4"
+    },
+    "lint-staged": {
+      "src/**/*.{js,jsx,json,css}": [
+        "prettier --single-quote --write",
+        "git add"
+      ]
+    },
+    "scripts": {
+      "precommit": "lint-staged",
+      "start": "react-scripts --expose-gc start",
+      "build": "react-scripts build",
+      "test": "react-scripts test --env=jsdom",
+      "eject": "react-scripts eject"
+    },
+    "proxy": "http://localhost:4000"
+}

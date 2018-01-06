@@ -1,3 +1,4 @@
+ 
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
@@ -441,7 +442,13 @@ class App extends Component {
 	}
 	
 	componentDidMount(){
-		socket.on('connect', this.connect);
+		fetch('/user')
+			.then(res => res.json())
+			.then(user => this.state.username = user);
+
+		socket.emit('adduser', this.state.username);
+
+		// socket.on('connect', this.connect);
 		socket.on('updatechat', this.updatechat);
 		socket.on('roomslist', this.roomslist);
 		socket.on('userInfo', this.userInfo);
