@@ -445,11 +445,11 @@ class App extends Component {
 		fetch('/api/user', {
 			credentials: 'include'
 		})
-			.then(res => {
-				res.json().then(user => {
-					this.setState({username: user.u}, ()=>{socket.emit('adduser', this.state.username)});
-				});
+		.then(res => {
+			res.json().then(user => {
+				this.setState({username: user.u}, ()=>{socket.emit('adduser', this.state.username)});
 			});
+		});
 
 		// socket.on('connect', this.connect);
 		socket.on('updatechat', this.updatechat);
@@ -530,9 +530,11 @@ class App extends Component {
 	}
 	
 	updateUserList = (list, room)=>{
-		this.state.tabs[this.state.tabsNameList.indexOf(room)].users = list;
-		if (this.state.activeTab == room) {
-			this.setActiveTab(room);	
+		if (this.state.tabsNameList.indexOf(room) != -1) {
+			this.state.tabs[this.state.tabsNameList.indexOf(room)].users = list;
+			if (this.state.activeTab == room) {
+				this.setActiveTab(room);	
+			}
 		}
 	}
 	
@@ -614,7 +616,6 @@ class App extends Component {
 			socket.emit("newMatch");
 		}
 	}
-
 	render() {
 		return (
 			<div onClick={this.columnContainerContextMenu} className="columnContainer">

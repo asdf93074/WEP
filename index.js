@@ -60,7 +60,7 @@ app.post('/signuprequest', function(req, res){
     }
     else if(!(/[a-z]/.test(req.body.password)   &&   /[A-Z]/.test(req.body.password)   &&  /[0-9]/.test(req.body.password))){
         res.redirect('/signup');
-    } else {
+    } else{
         client.query(
             "INSERT INTO usertable (email, username, password, steamid) VALUES ($1, $2, $3, $4)",
             [req.body.email, req.body.username, req.body.password, Math.floor(Math.random()*1000)]
@@ -95,7 +95,7 @@ app.post('/loginrequest', function(req, res1){
     // )
     req.session.u = req.body.username;
     req.session.save();
-    res1.redirect('/api/user');
+    res1.redirect('http://localhost:3000');
 });
 
 var users = [];
@@ -195,13 +195,13 @@ io.sockets.on('connection', (socket) => {
         }
     });
 
-    socket.on('changeroom', function(newroom){
-        console.log('Changing room to:' + newroom);
-        socket.leave(socket.room);
-        socket.join(newroom);
-        socket.room = newroom;
-        socket.emit('updaterooms', rooms, newroom);
-    });
+    // socket.on('changeroom', function(newroom){
+    //     console.log('Changing room to:' + newroom);
+    //     socket.leave(socket.room);
+    //     socket.join(newroom);
+    //     socket.room = newroom;
+    //     socket.emit('updaterooms', rooms, newroom);
+    // });
 	
 	socket.on('roomJoin', function(roomName) {
         socket.join(roomName);
