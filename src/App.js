@@ -7,7 +7,7 @@ import * as FontAwesome from 'react-icons/lib/fa';
 
 var q = "https://d30y9cdsu7xlg0.cloudfront.net/png/45447-200.png";
 
-const socket = openSocket("http://localhost:4000");
+const socket = openSocket("http://localhost:3001");
 
 function Message(props) {
 	var c = [];
@@ -436,17 +436,20 @@ class App extends Component {
 
 		this.sendMessage = this.sendMessage.bind(this);
 		this.updatechat = this.updatechat.bind(this);
-		this.connect = this.connect.bind(this);
+		//this.connect = this.connect.bind(this);
 		this.newTab = this.newTab.bind(this);
 		this.columnContainerContextMenu = this.columnContainerContextMenu.bind(this);
 	}
 	
 	componentDidMount(){
-		fetch('/user')
-			.then(res => res.json())
-			.then(user => this.state.username = user);
-
-		socket.emit('adduser', this.state.username);
+		fetch('/api/user', {
+			credentials: 'include'
+		})
+			.then(res => {
+				res.json().then(user => {
+					this.setState({username: user.u}, ()=>{socket.emit('adduser', this.state.username)});
+				});
+			});
 
 		// socket.on('connect', this.connect);
 		socket.on('updatechat', this.updatechat);
@@ -477,11 +480,11 @@ class App extends Component {
 		this.setState({roomsList: rooms});
 	}
 
-	connect(){
-		var name = prompt("Enter username");
-		this.state.username = name;
-		socket.emit('adduser', name);
-	}
+	// connect(){
+	// 	var name = prompt("Enter username");
+	// 	this.state.username = name;
+	// 	socket.emit('adduser', name);
+	// }
 
 	updatechat(data){
 		const data_new = {

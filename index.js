@@ -1,17 +1,25 @@
 var express = require('express');
 var socket = require('socket.io');
 var bodyParser = require('body-parser');
+var session = require('express-session');
 var pg = require('pg');
-<<<<<<< HEAD
 var rs = require('randomstring');
-=======
 var router = express.Router();
->>>>>>> c50fd5b6a7108fd1d442266c16e8ef536bfbf9d3
 
 var connect = "pg://postgres:postgres@localhost:5432/reactapp";
 
 var app = express();
+var sess = {
+    secret: 'keyboard cat',
+    cookie: {'maxAge': 360000}
+    };
+    
+if (app.get('env') === 'production') {
+    app.set('trust proxy', 1) // trust first proxy
+    sess.cookie.secure = true // serve secure cookies
+  }
 
+app.use(session(sess));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json({type: function(req) {
        return req.headers['content-type'] === '*/*; charset=UTF-8'
@@ -24,8 +32,8 @@ app.use(bodyParser.json({type: function(req) {
 // });
 // var router = express.Router();
 
-var server = app.listen(4000, '0.0.0.0', function(){
-    console.log('listening for requests on port 4000,');
+var server = app.listen(3001, '0.0.0.0', function(){
+    console.log('listening for requests on port 3001,');
 });
 
 // app.use('/', router);
@@ -52,9 +60,7 @@ app.post('/signuprequest', function(req, res){
     }
     else if(!(/[a-z]/.test(req.body.password)   &&   /[A-Z]/.test(req.body.password)   &&  /[0-9]/.test(req.body.password))){
         res.redirect('/signup');
-    }
-    
-    else{
+    } else {
         client.query(
             "INSERT INTO usertable (email, username, password, steamid) VALUES ($1, $2, $3, $4)",
             [req.body.email, req.body.username, req.body.password, Math.floor(Math.random()*1000)]
@@ -63,29 +69,33 @@ app.post('/signuprequest', function(req, res){
     }
 });
 
-app.post('/loginrequest', function(req, res1){
-    client.query(
-        "SELECT * FROM usertable where username like '" + req.body.username + "' and password like '" + req.body.password + "'", (err, res) => {
-            if (err){
-                console.log(err);
-            }
-            else{
-                if (res.rows.length == 0){
-                    res1.redirect('/login');
-                }
-                else{
-                    res1.redirect('/');
-                }
-            }
-        }
-    )
-});
+app.get('/api/user', (req, res) => {
+    if (req.session.u != undefined) {
+      res.json(req.session);
+    } else {
+      res.json({u: undefined});
+    }
+  });
 
-app.get('/', function(req, res){
-    // res.json(
-    //     {username: "blah"}
-    // );
-    res.sendFile(__dirname + '/public/index.html');
+app.post('/loginrequest', function(req, res1){
+    // client.query(
+    //     "SELECT * FROM usertable where username like '" + req.body.username + "' and password like '" + req.body.password + "'", (err, res) => {
+    //         if (err){
+    //             console.log(err);
+    //         }
+    //         else{
+    //             if (res.rows.length == 0){
+    //                 res1.redirect('/login');
+    //             }
+    //             else{
+    //                 res1.redirect('/');
+    //             }
+    //         }
+    //     }
+    // )
+    req.session.u = req.body.username;
+    req.session.save();
+    res1.redirect('/api/user');
 });
 
 var users = [];
@@ -158,13 +168,10 @@ function createOpenMatch(c, o) {
 
 var io = socket(server);
 io.sockets.on('connection', (socket) => {
-
     socket.join('room1');
     socket.room = 'room1';
 	
     socket.emit('roomslist', rooms);
-
-    console.log(users);
 
 	socket.on('disconnect', function(){
 		console.log("USER DISCONNECTED: ", socket.username);
@@ -176,21 +183,16 @@ io.sockets.on('connection', (socket) => {
 	});
 	
     socket.on('adduser', function(username){
-		if (username != "") {
-			console.log("NEW USER: ", username);
-            socket.username = username;
-            usersToSocket[username] = socket;
-            if (userInfo[username] == undefined) {
-                var i = {};
-                i.online = 1;
-                i.status = 0;
-                userInfo[username] = i;
-                io.sockets.in(socket.room).emit('userInfoUpdate', username, i);
-            }
-			// socket.emit('updaterooms', rooms, 'room1');
-		}
-        //io.sockets.in(socket.room).emit('adduser', users);
-        //socket.emit('userInfo', userInfo);
+        console.log("NEW USER: ", username);
+        socket.username = username;
+        usersToSocket[username] = socket;
+        if (userInfo[username] == undefined) {
+            var i = {};
+            i.online = 1;
+            i.status = 0;
+            userInfo[username] = i;
+            io.sockets.in(socket.room).emit('userInfoUpdate', username, i);
+        }
     });
 
     socket.on('changeroom', function(newroom){
@@ -263,7 +265,6 @@ io.sockets.on('connection', (socket) => {
         }
     })
 
-<<<<<<< HEAD
     socket.on('challengeAccept', function(o){
         userIsFree(o,
         ()=>{
@@ -302,7 +303,3 @@ io.sockets.on('connection', (socket) => {
         )
     })
 });
-=======
-});
- 
->>>>>>> c50fd5b6a7108fd1d442266c16e8ef536bfbf9d3
