@@ -1,4 +1,3 @@
- 
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
@@ -11,14 +10,17 @@ const socket = openSocket("http://localhost:3001");
 
 function Message(props) {
 	var c = [];
+	let currentRoom = document.getElementsByClassName("rightClickMenu")[0].currentRoom;
 	for (let i = 0; i < props.data.length; i++) {
 		if (props.data[i].type == 'notice') {
 			c.push(<div className="messageNotice"><p className="notice">{props.data[i].message}</p></div>);
 		} else if (props.data[i].type == 'challengeNotice'){
 			console.log(props.data[i]);
 			c.push(<div className="messageNotice"><p className="notice">[PRIVATE] {props.data[i].message}
-			<span onClick={()=>{socket.emit("challengeAccept", props.data[i].opp)}}><p className="noticeOptions" id="noticeOptionAccept">Accept</p></span>
-			/<span onClick={()=>{socket.emit("challengeReject", props.data[i].opp)}}><p className="noticeOptions" id="noticeOptionDecline">Decline</p></span></p></div>);
+			<span onClick={()=>{socket.emit("challengeAccept", props.data[i].opp, currentRoom)}}><p className="noticeOptions" id="noticeOptionAccept">Accept</p></span>
+			/<span onClick={()=>{socket.emit("challengeReject", props.data[i].opp, currentRoom)}}><p className="noticeOptions" id="noticeOptionDecline">Decline</p></span></p></div>);
+		} else if (props.data[i].type == 'challengeNoticeReject'){
+			c.push(<div className="messageNotice"><p className="notice">[PRIVATE] {props.data[i].message}</p></div>);
 		} else {
 			c.push(<div className="message"><p className="userNames">{props.data[i].username}: </p>{props.data[i].message}<p class="messageTime">Time: {props.data[i].time}</p></div>);			
 
@@ -73,7 +75,7 @@ class RightClickMenu extends Component {
 		}
 
 		iFunctions[3] = function(){
-			socket.emit("challenge", document.getElementsByClassName("rightClickMenu")[0].currentTarget);
+			socket.emit("challenge", document.getElementsByClassName("rightClickMenu")[0].currentTarget, document.getElementsByClassName("rightClickMenu")[0].currentRoom);
 			document.getElementsByClassName("rightClickMenu")[0].style.visibility = "hidden";
 		}
 		return <div className="rightClickMenu"><RightClickMenuItems items={i} itemsFunc={iFunctions}/></div>;
@@ -247,11 +249,11 @@ class OpenMatches extends Component {
 	
 	render() {
 		var arr = [];
-		for (let i = 0; i < this.state.matches.length; i++) {
-			arr.push(<li className="OpenMatch">{this.state.matches[i].matchID}</li>)
+		for (let i = 0; i < this.props.matches.length; i++) {
+			arr.push(<li className="OpenMatch">{this.props.matches[i].matchid}</li>)
 		}
 		return (
-		<div className="OpenMatches"><p id="OpenMatchesHead">Open Matches - {this.state.matches.length}
+		<div className="OpenMatches"><p id="OpenMatchesHead">Open Matches - {this.props.matches.length}
 		</p><div className="OpenMatchesListContainer"><ul className="OpenMatchesList">{arr}</ul></div></div>
 		)
 	}
@@ -442,6 +444,10 @@ class App extends Component {
 	}
 	
 	componentDidMount(){
+		window.onbeforeunload = function() {
+			socket.emit('disconnect');
+		}
+
 		fetch('/api/user', {
 			credentials: 'include'
 		})
@@ -560,6 +566,7 @@ class App extends Component {
 	setActiveTab = (e)=>{
 		this.setState({activeTab: e}, function() {
 			this.setState({users: this.state.tabs[this.state.tabsNameList.indexOf(this.state.activeTab)].users});
+			document.getElementsByClassName("rightClickMenu")[0].currentRoom = e;
 		});
 	}
 	
@@ -616,6 +623,7 @@ class App extends Component {
 			socket.emit("newMatch");
 		}
 	}
+	
 	render() {
 		return (
 			<div onClick={this.columnContainerContextMenu} className="columnContainer">

@@ -379,7 +379,11 @@ body {
 .OpenMatches {
 	width: 96%;
 	height: 15%;
-    display: block;
+	display: block;
+}
+
+.OpenMatch {
+	cursor: pointer;
 }
 
 .OpenMatchesList {
@@ -651,7 +655,7 @@ body {
 	text-align: center;
 }
 
-.openMatch:hover {
+.OpenMatch:hover {
     background-color: grey;
 }
 

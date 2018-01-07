@@ -205,6 +205,7 @@ io.sockets.on('connection', (socket) => {
 	
 	socket.on('roomJoin', function(roomName) {
         socket.join(roomName);
+        rooms
 		console.log(socket.username," JOINED ",socket.room);
         roomsToUsers[roomName].push(socket.username);
         socket.emit('updatechat', {message: "Welcome to DoubleDamage, a Dota 2 league.", username: "DDBot", room: roomName, type: "notice"});
@@ -244,7 +245,7 @@ io.sockets.on('connection', (socket) => {
         // socket.broadcast.emit('typing', data);
     });
 
-    socket.on('challenge', function(u){
+    socket.on('challenge', function(u, r){
         console.log("NEW CHALLENGE FROM ", socket.username, u);
         if (userInfo[u].status == 0) {
             let t = usersToSocket[u];
@@ -252,7 +253,7 @@ io.sockets.on('connection', (socket) => {
             t.emit('updatechat', {
                 message: socket.username + " has challenged you to a match.",
                 username: "DDBot",
-                room: socket.room,
+                room: r,
                 type: "challengeNotice",
                 opp: socket.username
             });
@@ -265,40 +266,39 @@ io.sockets.on('connection', (socket) => {
         }
     })
 
-    socket.on('challengeAccept', function(o){
+    socket.on('challengeAccept', function(o, r){
         userIsFree(o,
         ()=>{
             if (pendingMatches[o+"vs"+socket.username] != undefined) {
                 let temp = createOpenMatch(o, socket.username);
-                io.sockets.in(socket.room).emit('openMatches', openMatches);
+                io.sockets.in(r).emit('openMatches', openMatches);
+                userInfo[o].status = 1;
+                userInfo[socket.username].status = 1;
                 pendingMatches[o+"vs"+socket.username] = undefined;
-                io.sockets.in(socket.room).emit('updatechat', {message: "["+temp.matchid+"] "+o+" has challenged " +  socket.username + ". Double-click on the right side to join the match."
-                , username: "DDBot", room: socket.room, type: "notice"});
+                io.sockets.in(r).emit('updatechat', {message: "["+temp.matchid+"] "+o+" has challenged " +  socket.username + ". Double-click on the right side to join the match."
+                , username: "DDBot", room: r, type: "notice"});
             } else {
                 socket.emit('challengeError', challengeErrorMessgages[20]);
             }
         },
         ()=>{
-            socket.emit('challengeError', challengeErrorMessgages[userInfo[u].status])
+            socket.emit('challengeError', challengeErrorMessgages[userInfo[o].status])
         }
         )
     })
 
-    socket.on('challengeReject', function(o){
+    socket.on('challengeReject', function(o, r){
         userIsFree(o,
         ()=>{
             if (pendingMatches[o+"vs"+socket.username] != undefined) {
-                let temp = createOpenMatch(o, socket.username);
-                io.sockets.in(socket.room).emit('openMatches', openMatches);
                 pendingMatches[o+"vs"+socket.username] = undefined;
-                io.sockets.in(socket.room).emit('updatechat', {message: "["+temp.matchid+"] "+o+" has challenged " +  socket.username + ". Double-click on the right side to join the match."
-                , username: "DDBot", room: socket.room, type: "notice"});
+                usersToSocket[o].emit('updatechat', {message: socket.username + " rejected your challenge.", type: 'challengeNoticeReject', room: r})
             } else {
                 socket.emit('challengeError', challengeErrorMessgages[20]);
             }
         },
         ()=>{
-            socket.emit('challengeError', challengeErrorMessgages[userInfo[u].status])
+            socket.emit('challengeError', challengeErrorMessgages[userInfo[o].status])
         }
         )
     })
