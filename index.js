@@ -100,10 +100,14 @@ app.post('/loginrequest', function(req, res1){
 
 var users = [];
 var rooms = [{roomName: 'room1', numberOfPlayers: 0}, {roomName: 'room2', numberOfPlayers: 0}, {roomName: 'room3', numberOfPlayers: 0}];
+var roomsIndex = {'room1': 0, 'room2': 1, 'room3': 2};
 var roomsToUsers = {'room1': [], 'room2': [], 'room3': []};
+var roomsToOpenMatches = {'room1': [], 'room2': [], 'room3': []};
 var usersToSocket = {};
 var userInfo = {};
 var openMatches = [];
+var openMatchesIndex = {};
+var openMatchesCounter = 0;
 var currentMatches = [];
 var pendingMatches = {};
 var retusers = [];
@@ -140,6 +144,14 @@ var challengeErrorMessgages = {
 	3: "That user is already playing in a game"
 };
 
+var challengeErrorMessgagesSelf = {
+    20: "This challenge has expired",
+	0: "No error",
+	1: "You are already in a challenge",
+	2: "You are already playing in a game",
+	3: "You are already playing in a game"
+};
+
 function userIsFree(u, callback, err) {
     console.log(userInfo, u);
     if (userInfo[u].status == 0) {
@@ -149,6 +161,16 @@ function userIsFree(u, callback, err) {
     } 
 }
 
+function openMatchExists(match, callback, err) {
+    for (let i = 0; i < openMatches.length; i++) {
+        if (openMatches[i].matchid == match) {
+            callback();
+        }
+    }
+
+    err();
+}
+
 function createOpenMatch(c, o) {
     let obj = {
         matchid: rs.generate(5),
@@ -156,11 +178,14 @@ function createOpenMatch(c, o) {
         opponent: o,
         challengerTeam: [],
         opponentTeam: [],
+        freeTeam: [],
         winner: null,
         avgTeamA: 0,
         avgTeamB: 0
     };
 
+    openMatchesIndex[obj.matchid] = openMatchesCounter;
+    openMatchesCounter++;
     openMatches.push(obj);
 
     return obj;
@@ -172,13 +197,21 @@ io.sockets.on('connection', (socket) => {
     socket.room = 'room1';
 	
     socket.emit('roomslist', rooms);
+    socket.emit('openMatches', openMatches);
 
 	socket.on('disconnect', function(){
-		console.log("USER DISCONNECTED: ", socket.username);
-        
-        for (let i = 0; i < rooms.length; i++) {
-            roomsToUsers[rooms[i].roomName].splice(roomsToUsers[rooms[i].roomName].indexOf(socket.username), 1);
-            io.sockets.in(rooms[i].roomName).emit('updateUserList', roomsToUsers[rooms[i].roomName], rooms[i].roomName);
+        if (socket.username != undefined) {
+            console.log("USER DISCONNECTED: ", socket.username);
+            for (let i = 0; i < rooms.length; i++) {
+                if (roomsToUsers[rooms[i].roomName].indexOf(socket.username) != -1) {
+                    roomsToUsers[rooms[i].roomName].splice(roomsToUsers[rooms[i].roomName].indexOf(socket.username), 1);
+                    rooms[i].numberOfPlayers--;
+                    usersToSocket[socket.username] = undefined;
+                    userInfo[socket.username].online = 0;
+                    io.sockets.in(rooms[i].roomName).emit('updateUserList', roomsToUsers[rooms[i].roomName], rooms[i].roomName);
+                    io.emit('roomslist', rooms);
+                }
+            }
         }
 	});
 	
@@ -192,6 +225,8 @@ io.sockets.on('connection', (socket) => {
             i.status = 0;
             userInfo[username] = i;
             io.sockets.in(socket.room).emit('userInfoUpdate', username, i);
+        } else {
+            userInfo[username].online = 1;
         }
     });
 
@@ -205,12 +240,12 @@ io.sockets.on('connection', (socket) => {
 	
 	socket.on('roomJoin', function(roomName) {
         socket.join(roomName);
-        rooms
-		console.log(socket.username," JOINED ",socket.room);
+        rooms[roomsIndex[roomName]].numberOfPlayers++;
+        io.emit('roomslist', rooms);
+        socket.emit('openMatches', )
         roomsToUsers[roomName].push(socket.username);
         socket.emit('updatechat', {message: "Welcome to DoubleDamage, a Dota 2 league.", username: "DDBot", room: roomName, type: "notice"});
-        console.log(socket.room);
-		io.sockets.in(socket.room).emit('updateUserList', roomsToUsers[roomName], roomName);
+        io.sockets.in(socket.room).emit('updateUserList', roomsToUsers[roomName], roomName);
 	});
 
     socket.on('chat', function(data){
@@ -271,7 +306,7 @@ io.sockets.on('connection', (socket) => {
         ()=>{
             if (pendingMatches[o+"vs"+socket.username] != undefined) {
                 let temp = createOpenMatch(o, socket.username);
-                io.sockets.in(r).emit('openMatches', openMatches);
+                io.sockets.in(r).emit('openMatches', openMatches, r);
                 userInfo[o].status = 1;
                 userInfo[socket.username].status = 1;
                 pendingMatches[o+"vs"+socket.username] = undefined;
@@ -301,5 +336,18 @@ io.sockets.on('connection', (socket) => {
             socket.emit('challengeError', challengeErrorMessgages[userInfo[o].status])
         }
         )
+    })
+
+    socket.on('joinMatch', function(match, roomName) {
+        console.log(userInfo, socket.username, roomName);
+        if (userInfo[socket.username].status == 0) {
+            openMatches[openMatchesIndex[match]].freeTeam.push(socket.username);
+            io.sockets.in(roomName).emit('updatechat', {message: socket.username + " signed up for match " + match + ".", type: 'notice', room: roomName});
+            io.sockets.in(roomName).emit('openMatches', openMatches, roomName);
+            userInfo[socket.username].status = 1;
+            socket.emit()
+        } else {
+            socket.emit('challengeError', challengeErrorMessgagesSelf[userInfo[socket.username].status]);
+        }
     })
 });

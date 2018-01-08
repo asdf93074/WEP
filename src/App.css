@@ -193,6 +193,7 @@ body {
 }
 
 .playersListUserNames {
+	user-select: none;
 	/*border-bottom: 1px solid black;*/
 	font-style: italic;
 	/*text-align: center;*/
@@ -227,6 +228,7 @@ body {
 }
 
 .rightClickMenu {
+	user-select: none;
 	position: absolute;
 	border: 1px solid black;
 	border-radius: 5px;
@@ -254,6 +256,7 @@ body {
 }
 
 #TabBarList {
+	user-select: none;
 	padding-left: 0;
 	display: block;
 	text-decoration: none;
@@ -343,6 +346,7 @@ body {
 }
 
 .CurrentMatches {
+	user-select: none;
 	width: 96%;
 	height: 15%;
     display: block;
@@ -377,6 +381,7 @@ body {
 }
 
 .OpenMatches {
+	user-select: none;
 	width: 96%;
 	height: 15%;
 	display: block;

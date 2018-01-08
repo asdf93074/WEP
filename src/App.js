@@ -5,14 +5,20 @@ import openSocket from 'socket.io-client';
 import * as FontAwesome from 'react-icons/lib/fa';
 
 var q = "https://d30y9cdsu7xlg0.cloudfront.net/png/45447-200.png";
+var sent = 0;
 
 const socket = openSocket("http://localhost:3001");
+
+// window.onbeforeunload = function() {
+// 	socket.emit('disconnect');
+// }
 
 function Message(props) {
 	var c = [];
 	let currentRoom = document.getElementsByClassName("rightClickMenu")[0].currentRoom;
 	for (let i = 0; i < props.data.length; i++) {
 		if (props.data[i].type == 'notice') {
+			console.log(props.data[i]);
 			c.push(<div className="messageNotice"><p className="notice">{props.data[i].message}</p></div>);
 		} else if (props.data[i].type == 'challengeNotice'){
 			console.log(props.data[i]);
@@ -246,11 +252,16 @@ class OpenMatches extends Component {
 		super(props);
 		this.state = {matches: props.matches, startTime: props.startTime}
 	}
+
+	joinMatch(matchid) {
+		this.props.joinMatch(matchid);
+	}
 	
 	render() {
 		var arr = [];
 		for (let i = 0; i < this.props.matches.length; i++) {
-			arr.push(<li className="OpenMatch">{this.props.matches[i].matchid}</li>)
+			console.log(this.props.matches[i]);
+			arr.push(<li className="OpenMatch" onDoubleClick={this.joinMatch.bind(this, this.props.matches[i].matchid)}>{this.props.matches[i].matchid} ({this.props.matches[i].freeTeam.length + this.props.matches[i].challengerTeam.length + this.props.matches[i].opponentTeam.length + 2}/10)</li>)
 		}
 		return (
 		<div className="OpenMatches"><p id="OpenMatchesHead">Open Matches - {this.props.matches.length}
@@ -444,19 +455,17 @@ class App extends Component {
 	}
 	
 	componentDidMount(){
-		window.onbeforeunload = function() {
-			socket.emit('disconnect');
-		}
-
-		fetch('/api/user', {
-			credentials: 'include'
-		})
-		.then(res => {
-			res.json().then(user => {
-				this.setState({username: user.u}, ()=>{socket.emit('adduser', this.state.username)});
+		if (sent == 0) {
+			fetch('/api/user', {
+				credentials: 'include'
+			})
+			.then(res => {
+				res.json().then(user => {
+					this.setState({username: user.u}, ()=>{socket.emit('adduser', this.state.username)});
+				});
 			});
-		});
-
+			sent = 1;
+		}
 		// socket.on('connect', this.connect);
 		socket.on('updatechat', this.updatechat);
 		socket.on('roomslist', this.roomslist);
@@ -466,9 +475,13 @@ class App extends Component {
 		socket.on('openMatches', this.updateOpenMatches);
 	}
 
-	updateOpenMatches = (obj)=>{
-		console.log(obj);
-		this.setState({openMatches: obj});
+	updateOpenMatches = (obj, r)=>{
+		if (this.state.tabsNameList.indexOf(r) != -1) {
+			this.state.tabs[this.state.tabsNameList.indexOf(r)].openMatches = obj;
+			if (this.state.activeTab == r) {
+				this.setActiveTab(r);
+			}
+		}
 	}
 
 	userInfo = (u)=>{
@@ -493,6 +506,7 @@ class App extends Component {
 	// }
 
 	updatechat(data){
+		console.log(data);
 		const data_new = {
 			username: data.username,
 			message: data.message,
@@ -536,6 +550,7 @@ class App extends Component {
 	}
 	
 	updateUserList = (list, room)=>{
+		console.log(list, room);
 		if (this.state.tabsNameList.indexOf(room) != -1) {
 			this.state.tabs[this.state.tabsNameList.indexOf(room)].users = list;
 			if (this.state.activeTab == room) {
@@ -547,7 +562,7 @@ class App extends Component {
 	newTab(e) {
 		if (this.state.tabsNameList.indexOf(e) == -1) {
 			socket.emit("roomJoin", e);
-			this.state.tabs.push({value: e, messages: [], users: []});
+			this.state.tabs.push({value: e, messages: [], users: [], openMatches: []});
 			this.state.tabsNameList.push(e);
 			this.setActiveTab(e);
 			this.forceUpdate();
@@ -565,8 +580,10 @@ class App extends Component {
 	
 	setActiveTab = (e)=>{
 		this.setState({activeTab: e}, function() {
-			this.setState({users: this.state.tabs[this.state.tabsNameList.indexOf(this.state.activeTab)].users});
-			document.getElementsByClassName("rightClickMenu")[0].currentRoom = e;
+			this.setState({users: this.state.tabs[this.state.tabsNameList.indexOf(this.state.activeTab)].users}, function(){
+				this.setState({openMatches: this.state.tabs[this.state.tabsNameList.indexOf(this.state.activeTab)].openMatches});
+				document.getElementsByClassName("rightClickMenu")[0].currentRoom = e;
+			});
 		});
 	}
 	
@@ -623,6 +640,10 @@ class App extends Component {
 			socket.emit("newMatch");
 		}
 	}
+
+	joinMatch = (match)=>{
+		socket.emit('joinMatch', match, document.getElementsByClassName('rightClickMenu')[0].currentRoom);
+	}
 	
 	render() {
 		return (
@@ -655,7 +676,7 @@ class App extends Component {
 				</div>
 				<div id="rightColumn">
 					<CurrentMatches matches={this.state.currentMatches} /><br></br>
-					<OpenMatches matches={this.state.openMatches} /><br></br>
+					<OpenMatches matches={this.state.openMatches} joinMatch={this.joinMatch}/><br></br>
 					<Info startNewGame={this.startNewGame} info={this.state.info} username={this.state.username} check={this.state.infoCheck}/>
 				</div>
 				<div id="rightColumnButton" onClick={this.rightColumnButtonClick}>
