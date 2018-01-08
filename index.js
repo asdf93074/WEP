@@ -17,7 +17,8 @@ var sess = {
 if (app.get('env') === 'production') {
     app.set('trust proxy', 1) // trust first proxy
     sess.cookie.secure = true // serve secure cookies
-  }
+}
+
 
 app.use(session(sess));
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -103,14 +104,26 @@ var rooms = [{roomName: 'room1', numberOfPlayers: 0}, {roomName: 'room2', number
 var roomsIndex = {'room1': 0, 'room2': 1, 'room3': 2};
 var roomsToUsers = {'room1': [], 'room2': [], 'room3': []};
 var roomsToOpenMatches = {'room1': [], 'room2': [], 'room3': []};
+var openMatchesToRoom = {};
+var roomsToCurrentMatches = {'room1': [], 'room2': [], 'room3': []};
+var currentMatchesToRoom = {};
 var usersToSocket = {};
 var userInfo = {};
 var openMatches = [];
+var openMatchTurn = {};
 var openMatchesIndex = {};
 var openMatchesCounter = 0;
 var currentMatches = [];
+var currentMatchTurn = {};
+var currentMatchesIndex = {};
+var currentMatchesCounter = 0;
+var currentMatches = [];
 var pendingMatches = {};
 var retusers = [];
+
+function getRandomInt(max) {
+    return Math.floor(Math.random() * Math.floor(max));
+}
 
 function insertDetails(matchid, chal, opp, chalteam, oppteam, winner, avgscra, avgscrb){
     client.query(
@@ -171,6 +184,20 @@ function openMatchExists(match, callback, err) {
     err();
 }
 
+function emitToUsers(u, eventName, args) {
+    let s = [];
+    for (let i = 0; i < u.length; i++) {
+        s.push(usersToSocket[u[i]]);
+    }
+    for (let j = 0; j < s.length; j++) {
+        if (eventName == 'draftOpen') {
+            s[j].join(args.matchData.matchid);
+        }
+        s[j].emit(eventName, args);
+        console.log("SENT");
+    }
+}
+
 function createOpenMatch(c, o) {
     let obj = {
         matchid: rs.generate(5),
@@ -191,13 +218,21 @@ function createOpenMatch(c, o) {
     return obj;
 }
 
+function removeOpenMatchFromRoom(room, id) {
+    console.log(roomsToOpenMatches, id, room);
+    for (let i = 0; i < roomsToOpenMatches[room].length; i++) {
+        if (roomsToOpenMatches[room][i].matchid == id) {
+            roomsToOpenMatches[room].splice(i, 1);
+        }
+    }
+}
+
 var io = socket(server);
 io.sockets.on('connection', (socket) => {
     socket.join('room1');
     socket.room = 'room1';
 	
     socket.emit('roomslist', rooms);
-    socket.emit('openMatches', openMatches);
 
 	socket.on('disconnect', function(){
         if (socket.username != undefined) {
@@ -242,13 +277,15 @@ io.sockets.on('connection', (socket) => {
         socket.join(roomName);
         rooms[roomsIndex[roomName]].numberOfPlayers++;
         io.emit('roomslist', rooms);
-        socket.emit('openMatches', )
+        socket.emit('openMatches', roomsToOpenMatches[roomName], roomName);
+        socket.emit('currentMatches', roomsToCurrentMatches[roomName], roomName);
         roomsToUsers[roomName].push(socket.username);
         socket.emit('updatechat', {message: "Welcome to DoubleDamage, a Dota 2 league.", username: "DDBot", room: roomName, type: "notice"});
         io.sockets.in(socket.room).emit('updateUserList', roomsToUsers[roomName], roomName);
 	});
 
     socket.on('chat', function(data){
+        console.log(data);
         if (usersToSocket[data.room] == undefined) {
             io.sockets.in(data.room).emit('updatechat', {
                 message: data.message,
@@ -299,14 +336,16 @@ io.sockets.on('connection', (socket) => {
         } else {
             socket.emit('challengeError', challengeErrorMessgages[userInfo[u].status]);
         }
-    })
+    });
 
     socket.on('challengeAccept', function(o, r){
         userIsFree(o,
         ()=>{
             if (pendingMatches[o+"vs"+socket.username] != undefined) {
                 let temp = createOpenMatch(o, socket.username);
-                io.sockets.in(r).emit('openMatches', openMatches, r);
+                roomsToOpenMatches[r].push(temp);
+                openMatchesToRoom[temp.matchid] = r;
+                io.sockets.in(r).emit('openMatches', roomsToOpenMatches[r], r);
                 userInfo[o].status = 1;
                 userInfo[socket.username].status = 1;
                 pendingMatches[o+"vs"+socket.username] = undefined;
@@ -320,7 +359,7 @@ io.sockets.on('connection', (socket) => {
             socket.emit('challengeError', challengeErrorMessgages[userInfo[o].status])
         }
         )
-    })
+    });
 
     socket.on('challengeReject', function(o, r){
         userIsFree(o,
@@ -336,18 +375,107 @@ io.sockets.on('connection', (socket) => {
             socket.emit('challengeError', challengeErrorMessgages[userInfo[o].status])
         }
         )
-    })
+    });
 
     socket.on('joinMatch', function(match, roomName) {
         console.log(userInfo, socket.username, roomName);
         if (userInfo[socket.username].status == 0) {
+            let oldCount = openMatches[openMatchesIndex[match]].freeTeam.length + 2;
             openMatches[openMatchesIndex[match]].freeTeam.push(socket.username);
+            let newCount = openMatches[openMatchesIndex[match]].freeTeam.length + 2;
             io.sockets.in(roomName).emit('updatechat', {message: socket.username + " signed up for match " + match + ".", type: 'notice', room: roomName});
-            io.sockets.in(roomName).emit('openMatches', openMatches, roomName);
+            io.sockets.in(roomName).emit('openMatches', roomsToOpenMatches[roomName], roomName);
             userInfo[socket.username].status = 1;
-            socket.emit()
+            if (newCount == 4 && oldCount == 3) {
+                io.sockets.in(roomName).emit('updatechat', {message: 10 + " players have signed up for match " + match + ". The captains can start the game now.", type: 'notice', room: roomName});
+                let chall = usersToSocket[openMatches[openMatchesIndex[match]].challenger];
+                let opp = usersToSocket[openMatches[openMatchesIndex[match]].opponent];
+                chall.emit('startButton', match, roomName);
+            }
+            socket.emit('leaveButton', match, roomName);
         } else {
             socket.emit('challengeError', challengeErrorMessgagesSelf[userInfo[socket.username].status]);
         }
-    })
+    });
+
+    socket.on('startGame', function(id, r) {
+        if (openMatches[openMatchesIndex[id]].freeTeam.length >= 2) {
+            console.log("GAME STARTED");
+            io.sockets.in(r).emit('updatechat', {message: "Draft for match " + id + " has started.", type: 'notice', room: r});
+            let u = openMatches[openMatchesIndex[id]].freeTeam;
+            // u.push(openMatches[openMatchesIndex[id]].challenger);
+            // u.push(openMatches[openMatchesIndex[id]].opponent);
+            emitToUsers([...u, openMatches[openMatchesIndex[id]].challenger, openMatches[openMatchesIndex[id]].opponent], 'draftOpen', {i: id, roomName: r, type: 'draft', matchData: openMatches[openMatchesIndex[id]]});
+            let t = getRandomInt(2);
+            if (t == 0) {
+                io.sockets.in(id).emit('updatechat', {message: openMatches[openMatchesIndex[id]].challenger + " has first pick. Double click on a player in the 'Players' list to pick them.", type: 'notice', room: id});
+                openMatchTurn[id] = t;
+            } else {
+                io.sockets.in(id).emit('updatechat', {message: openMatches[openMatchesIndex[id]].opponent + " has first pick. Double click on a player in the 'Players' list to pick them.", type: 'notice', room: id});
+                openMatchTurn[id] = t;
+            }
+            console.log("TURN", openMatchTurn);
+        } else {
+            socket.emit('startGameError', "Not enough players yet.");
+        }
+    });
+
+    socket.on('playerSelect', function(player, id){
+        let c = openMatches[openMatchesIndex[id]].challengerTeam.length + openMatches[openMatchesIndex[id]].opponentTeam.length;
+        if (c != 4) {
+            let i;
+            let n;
+            if (openMatches[openMatchesIndex[id]].challenger == socket.username) {
+                n = openMatches[openMatchesIndex[id]].opponent;
+                i = 0;
+            } else if (openMatches[openMatchesIndex[id]].opponent == socket.username) {
+                n = openMatches[openMatchesIndex[id]].challenger;
+                i = 1;
+            }
+
+            console.log(i, openMatchTurn[id]);
+            if (i == openMatchTurn[id]) {
+                if (i == 0) {
+                    openMatches[openMatchesIndex[id]].challengerTeam.push(player);
+                } else {
+                    openMatches[openMatchesIndex[id]].opponentTeam.push(player);
+                }
+                openMatches[openMatchesIndex[id]].freeTeam.splice(openMatches[openMatchesIndex[id]].freeTeam.indexOf(player), 1);
+                io.sockets.in(id).emit('openMatches', roomsToOpenMatches[openMatchesToRoom[id]], openMatchesToRoom[id]);
+                i++;
+                i = i % 2;
+                openMatchTurn[id] = i;
+                c = openMatches[openMatchesIndex[id]].challengerTeam.length + openMatches[openMatchesIndex[id]].opponentTeam.length + 2;
+                if (c < 4) {
+                    io.sockets.in(id).emit('updatechat', {message: socket.username + " picked " + player + ". " + n + "'s turn to pick.", type: 'notice', room: id});
+                } else if (c == 4) {
+                    let temp = openMatches[openMatchesIndex[id]];
+                    io.sockets.in(id).emit('updatechat', {message: socket.username + " picked " + player + ". Drafting is finished. Pick a result from the right side once the game has ended.", type: 'notice', room: id});
+                    io.sockets.in(openMatchesToRoom[id]).emit('updatechat', {message: "Team " + temp.challenger
+                    + ":" + temp.challengerTeam[0] + ", " + temp.challengerTeam[1] + ", " + temp.challengerTeam[2] + ", " + temp.challengerTeam[3] + " vs " + temp.opponent
+                    + ":" + temp.opponentTeam[0] + ", " + temp.opponentTeam[1] + ", " + temp.opponentTeam[2] + ", " + temp.opponentTeam[3], type: 'notice', room: openMatchesToRoom[id]});
+                    currentMatches.push(temp);
+                    currentMatchesIndex[id] = currentMatchesCounter++;
+                    currentMatchesToRoom[id] = openMatchesToRoom[id];
+                    roomsToCurrentMatches[openMatchesToRoom[id]].push(temp);
+
+                    openMatches.splice(currentMatchesIndex[id], 1);
+                    removeOpenMatchFromRoom(openMatchesToRoom[id], id);
+                    console.log("DONE", openMatches);
+                    io.sockets.in(currentMatchesToRoom[id]).emit('openMatches', roomsToOpenMatches[currentMatchesToRoom[id]], openMatchesToRoom[id]);
+
+                    openMatchesToRoom[id] = undefined;
+                    openMatchesIndex[id] = undefined;
+                    openMatchesCounter--;
+
+                    console.log("SENDING CURRENT", currentMatches, roomsToCurrentMatches);
+                    io.sockets.in(currentMatchesToRoom[id]).emit('currentMatches', roomsToCurrentMatches[currentMatchesToRoom[id]], currentMatchesToRoom[id]);
+                }
+            } else {
+                socket.emit('challengeError', "It is not your turn yet.");
+            }
+        } else {
+            socket.emit('challengeError', "Your team is full.");
+        }
+    });
 });

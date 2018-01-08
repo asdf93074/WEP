@@ -18,10 +18,8 @@ function Message(props) {
 	let currentRoom = document.getElementsByClassName("rightClickMenu")[0].currentRoom;
 	for (let i = 0; i < props.data.length; i++) {
 		if (props.data[i].type == 'notice') {
-			console.log(props.data[i]);
 			c.push(<div className="messageNotice"><p className="notice">{props.data[i].message}</p></div>);
 		} else if (props.data[i].type == 'challengeNotice'){
-			console.log(props.data[i]);
 			c.push(<div className="messageNotice"><p className="notice">[PRIVATE] {props.data[i].message}
 			<span onClick={()=>{socket.emit("challengeAccept", props.data[i].opp, currentRoom)}}><p className="noticeOptions" id="noticeOptionAccept">Accept</p></span>
 			/<span onClick={()=>{socket.emit("challengeReject", props.data[i].opp, currentRoom)}}><p className="noticeOptions" id="noticeOptionDecline">Decline</p></span></p></div>);
@@ -214,16 +212,57 @@ class ChatWindowsRenderer extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			tabs: props.tabs
+			tabs: props.tabs,
+			playerSelect: props.playerSelect
 		}
 	}
 
 	render() {
 		var c = [];
-		for (let i = 0; i < this.state.tabs.length; i++) {
-			c.push(<div className="ChatWindow" id={this.state.tabs[i].value+"Data"}>
-							<Message data={this.state.tabs[i].messages} /*username={this.state.tabs[i].username}*//>
-						</div>)
+		for (let i = 0; i < this.props.tabs.length; i++) {
+			if (this.props.tabs[i].type != "draft") {
+				c.push(<div className="ChatWindow" id={this.props.tabs[i].value+"Data"}>
+				<Message data={this.props.tabs[i].messages} /*username={this.props.tabs[i].username}*//>
+				</div>);
+			} else if (this.props.tabs[i].type == "draft") {
+				let cTeam = [<li>{this.props.tabs[i].challenger}</li>];
+				let fTeam = [];
+				let oTeam = [<li>{this.props.tabs[i].opponent}</li>];
+
+				for (let j = 0; j < this.props.tabs[i].chalTeam.length; j++) {
+					cTeam.push(<li>{this.props.tabs[i].chalTeam[j]}</li>);
+				}
+				for (let j = 0; j < this.props.tabs[i].freeTeam.length; j++) {
+					fTeam.push(<li onDoubleClick={this.state.playerSelect.bind(this, this.props.tabs[i].freeTeam[j], this.props.tabs[i].value)}>{this.props.tabs[i].freeTeam[j]}</li>);
+				}
+				for (let j = 0; j < this.props.tabs[i].oppTeam.length; j++) {
+					oTeam.push(<li>{this.props.tabs[i].oppTeam[j]}</li>);
+				}
+
+				c.push(<div className="ChatWindow" id={this.props.tabs[i].value+"Data"}>
+						<div id="userColContainer">
+							<div className="userCol" id={this.props.tabs[i].value+"ChallTeam"}>
+								<p>{this.props.tabs[i].challenger}'s Team</p>
+								<ul>
+									{cTeam}
+								</ul>
+							</div>
+							<div className="userCol" id={this.props.tabs[i].value+"FreeTeam"}>
+								<p>Players</p>
+								<ul>
+									{fTeam}
+								</ul>
+							</div>
+							<div className="userCol" id={this.props.tabs[i].value+"OppTeam"}>
+								<p>{this.props.tabs[i].opponent}'s Team</p>
+								<ul>
+									{oTeam}
+								</ul>
+							</div>
+						</div>
+						<Message data={this.props.tabs[i].messages} /*username={this.props.tabs[i].username}*//>
+						</div>);
+			}
 		}
 		return <div id="ChatWindows">{c}</div>;
 	}
@@ -237,11 +276,11 @@ class CurrentMatches extends Component {
 	
 	render() {
 		var arr = [];
-		for (let i = 0; i < this.state.matches.length; i++) {
-			arr.push(<li className="CurrentMatch">{this.state.matches[i].matchID}</li>)
+		for (let i = 0; i < this.props.matches.length; i++) {
+			arr.push(<li className="CurrentMatch">{this.props.matches[i].matchid}</li>)
 		}
 		return (
-		<div className="CurrentMatches"><p id="CurrentMatchesHead">Current Matches - {this.state.matches.length}
+		<div className="CurrentMatches"><p id="CurrentMatchesHead">Current Matches - {this.props.matches.length}
 		</p><div className="CurrentMatchesListContainer"><ul className="CurrentMatchesList">{arr}</ul></div></div>
 		)
 	}
@@ -260,7 +299,6 @@ class OpenMatches extends Component {
 	render() {
 		var arr = [];
 		for (let i = 0; i < this.props.matches.length; i++) {
-			console.log(this.props.matches[i]);
 			arr.push(<li className="OpenMatch" onDoubleClick={this.joinMatch.bind(this, this.props.matches[i].matchid)}>{this.props.matches[i].matchid} ({this.props.matches[i].freeTeam.length + this.props.matches[i].challengerTeam.length + this.props.matches[i].opponentTeam.length + 2}/10)</li>)
 		}
 		return (
@@ -384,11 +422,16 @@ class Info extends Component {
 		super(props);
 	}
 
+	startGameButtonClick = (id, r)=>{
+		this.props.startGame(id, r);
+	}
+
 	render() {
 		let u = this.props.username;
 		let i = this.props.info;
 		let m = "";
-		let s;
+		let s, b;
+		let start = this.props.startButtonStatus;
 		
 		if (this.props.check == 1) {
 			if (i[u].status == 0) {
@@ -403,9 +446,11 @@ class Info extends Component {
 			s = <p>You are currently </p>;
 		}
 
-		return(<div id="info">{s}<br></br>
-		<div id="StartGameButton">Start Game</div>
-		</div>);
+		if (start != undefined) {
+			b = <div id="StartGameButton" onClick={this.startGameButtonClick.bind(this, this.props.startButtonStatus.id, this.props.startButtonStatus.r)}>Start Game</div>;
+		}
+
+		return(<div id="info">{s}<br></br>{b}</div>);
 	}
 }
 
@@ -417,12 +462,18 @@ class Challenge extends Component {
 
 	componentDidMount() {
 		socket.on("challengeError", (u)=>{
-			console.log(u);
 			this.setState({p: u});
 			document.getElementById("overlay").style.zIndex = 100;
 			document.getElementById("ChallengeModal").style.zIndex = 101;
 			document.getElementById("ChallengeModal").style.display = "block";
-		})
+		});
+
+		socket.on("startGameError", (u)=>{
+			this.setState({p: u});
+			document.getElementById("overlay").style.zIndex = 100;
+			document.getElementById("ChallengeModal").style.zIndex = 101;
+			document.getElementById("ChallengeModal").style.display = "block";
+		});
 	}
 
 	render() {
@@ -473,9 +524,59 @@ class App extends Component {
 		socket.on('userInfoUpdate', this.userInfoUpdate);
 		socket.on('updateUserList', this.updateUserList);
 		socket.on('openMatches', this.updateOpenMatches);
+		socket.on('currentMatches', this.updateCurrentMatches);
+		socket.on('startButton', this.startButtonEvent);
+		socket.on('draftOpen', this.startDraft);
+	}
+
+	startDraft = (args)=>{
+		let id = args.i;
+		let room = args.roomName;
+		let t = args.type;
+		let d = args.matchData;
+		let cTeam = [d.challengerTeam];
+		let oTeam = [d.opponentTeam];
+
+		if (this.state.tabsNameList.indexOf(id) == -1 && t == 'draft') {
+			this.state.tabs.push({value: id, messages: [], users: [], challenger: d.challenger, opponent: d.opponent, openMatches: [], currentMatches: [], type: 'draft', freeTeam: d.freeTeam, chalTeam: cTeam, oppTeam: oTeam});
+			this.state.tabsNameList.push(id);
+			this.setActiveTab(id);
+			this.forceUpdate();
+		}
+	}
+
+	startButtonEvent = (match, room)=>{
+		this.setState({startButtonStatus: {id: match, r: room}});
+	}
+
+	updateCurrentMatches = (obj, r)=>{
+		console.log("CURRENT", obj, r);
+		for (let i = 0; i < obj.length; i++) {
+			if (this.state.tabsNameList.indexOf(obj[i].matchid) != -1) {
+				this.state.tabs[this.state.tabsNameList.indexOf(obj[i].matchid)].chalTeam = obj[i].challengerTeam;
+				this.state.tabs[this.state.tabsNameList.indexOf(obj[i].matchid)].freeTeam = obj[i].freeTeam;
+				this.state.tabs[this.state.tabsNameList.indexOf(obj[i].matchid)].oppTeam = obj[i].opponentTeam;
+				this.forceUpdate();
+			}
+		}
+		if (this.state.tabsNameList.indexOf(r) != -1) {
+			this.state.tabs[this.state.tabsNameList.indexOf(r)].currentMatches = obj;
+			if (this.state.activeTab == r) {
+				this.setActiveTab(r);
+			}
+		}
 	}
 
 	updateOpenMatches = (obj, r)=>{
+		console.log(obj, r);
+		for (let i = 0; i < obj.length; i++) {
+			if (this.state.tabsNameList.indexOf(obj[i].matchid) != -1) {
+				this.state.tabs[this.state.tabsNameList.indexOf(obj[i].matchid)].chalTeam = obj[i].challengerTeam;
+				this.state.tabs[this.state.tabsNameList.indexOf(obj[i].matchid)].freeTeam = obj[i].freeTeam;
+				this.state.tabs[this.state.tabsNameList.indexOf(obj[i].matchid)].oppTeam = obj[i].opponentTeam;
+				this.forceUpdate();
+			}
+		}
 		if (this.state.tabsNameList.indexOf(r) != -1) {
 			this.state.tabs[this.state.tabsNameList.indexOf(r)].openMatches = obj;
 			if (this.state.activeTab == r) {
@@ -506,7 +607,7 @@ class App extends Component {
 	// }
 
 	updatechat(data){
-		console.log(data);
+		console.log("MESSAGE", data);
 		const data_new = {
 			username: data.username,
 			message: data.message,
@@ -550,7 +651,6 @@ class App extends Component {
 	}
 	
 	updateUserList = (list, room)=>{
-		console.log(list, room);
 		if (this.state.tabsNameList.indexOf(room) != -1) {
 			this.state.tabs[this.state.tabsNameList.indexOf(room)].users = list;
 			if (this.state.activeTab == room) {
@@ -562,7 +662,7 @@ class App extends Component {
 	newTab(e) {
 		if (this.state.tabsNameList.indexOf(e) == -1) {
 			socket.emit("roomJoin", e);
-			this.state.tabs.push({value: e, messages: [], users: [], openMatches: []});
+			this.state.tabs.push({value: e, messages: [], users: [], openMatches: [], currentMatches: []});
 			this.state.tabsNameList.push(e);
 			this.setActiveTab(e);
 			this.forceUpdate();
@@ -571,7 +671,7 @@ class App extends Component {
 
 	newTabPM(e) {
 		if (this.state.tabsNameList.indexOf(e) == -1 ) {
-			this.state.tabs.push({value: e, messages: [], users: []});
+			this.state.tabs.push({value: e, messages: [], users: [], currentMatches: []});
 			this.state.tabsNameList.push(e);
 			this.setActiveTab(e);
 			this.forceUpdate();
@@ -581,8 +681,10 @@ class App extends Component {
 	setActiveTab = (e)=>{
 		this.setState({activeTab: e}, function() {
 			this.setState({users: this.state.tabs[this.state.tabsNameList.indexOf(this.state.activeTab)].users}, function(){
-				this.setState({openMatches: this.state.tabs[this.state.tabsNameList.indexOf(this.state.activeTab)].openMatches});
-				document.getElementsByClassName("rightClickMenu")[0].currentRoom = e;
+				this.setState({openMatches: this.state.tabs[this.state.tabsNameList.indexOf(this.state.activeTab)].openMatches}, function() {
+					this.setState({currentMatches: this.state.tabs[this.state.tabsNameList.indexOf(this.state.activeTab)].currentMatches});
+					document.getElementsByClassName("rightClickMenu")[0].currentRoom = e;
+				});
 			});
 		});
 	}
@@ -635,14 +737,16 @@ class App extends Component {
 		this.forceUpdate();
 	}
 
-	startNewGame = ()=>{
-		if (this.state.userInfo[this.state.username].status == 0) {
-			socket.emit("newMatch");
-		}
+	startGame = (id, r)=>{
+		socket.emit('startGame', id, r);
 	}
 
 	joinMatch = (match)=>{
 		socket.emit('joinMatch', match, document.getElementsByClassName('rightClickMenu')[0].currentRoom);
+	}
+
+	playerSelect = (player, id)=>{
+		socket.emit('playerSelect', player, id);
 	}
 	
 	render() {
@@ -668,7 +772,7 @@ class App extends Component {
 						<TabName tabs={this.state.tabs} activeTabHandler={this.setActiveTab} />
 						{/*<ChatTabRenderer tabs={this.state.tabs} activeTabHandler={this.activeTabHandler}/>*/}
 					</div>
-					<ChatWindowsRenderer tabs={this.state.tabs} />
+					<ChatWindowsRenderer playerSelect={this.playerSelect} tabs={this.state.tabs} matchesData={this.state.openMatches}/>
 					<input type="text" id="chatBox" placeholder="Message" onKeyDown={this.sendMessage}></input>
 						{/*
 					<button onClick={this.newTab} type="button" id="chatButton">Send</button>
@@ -677,7 +781,7 @@ class App extends Component {
 				<div id="rightColumn">
 					<CurrentMatches matches={this.state.currentMatches} /><br></br>
 					<OpenMatches matches={this.state.openMatches} joinMatch={this.joinMatch}/><br></br>
-					<Info startNewGame={this.startNewGame} info={this.state.info} username={this.state.username} check={this.state.infoCheck}/>
+					<Info startButtonStatus={this.state.startButtonStatus} startGame={this.startGame} info={this.state.info} username={this.state.username} check={this.state.infoCheck}/>
 				</div>
 				<div id="rightColumnButton" onClick={this.rightColumnButtonClick}>
 					<FontAwesome.FaBars size="28" color="white" />
