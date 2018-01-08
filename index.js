@@ -57,7 +57,7 @@ app.post('/signuprequest', function(req, res){
     if(!(/^[A-Za-z0-9\_.]+[@]+[A-Za-z0-9]+[.]+[A-Za-z0-9]/.test(req.body.email))){
         res.redirect('/signup');
     }
-    else if(!(req.body.password.length<6 || req.body.password.length>24)){
+    else if(req.body.password.length<6 || req.body.password.length>24){
         res.redirect('/signup')
     }
     else if(!(/[a-z]/.test(req.body.password)   &&   /[A-Z]/.test(req.body.password)   &&  /[0-9]/.test(req.body.password))){
