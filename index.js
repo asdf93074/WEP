@@ -25,11 +25,13 @@ app.use(bodyParser.json({type: function(req) {
        return req.headers['content-type'] === '*/*; charset=UTF-8'
 }}));
 
-// app.use(function(req, res, next) {
-//     res.header("Access-Control-Allow-Origin", "*");
-//     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-//     next();
-// });
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+    res.header("Access-Control-Allow-Credentials", "true");
+    res.header("Access-Control-Allow-Headers", "Origin,Content-Type, Authorization, x-id, Content-Length, X-Requested-With");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    next();
+});
 // var router = express.Router();
 
 var server = app.listen(3001, '0.0.0.0', function(){
@@ -77,25 +79,30 @@ app.get('/api/user', (req, res) => {
     }
   });
 
+app.get('/logout', (req, res) => {
+    req.session.destroy();
+    res.redirect('http://localhost:3001/login');
+    // console.log("Logout request");
+})
+
 app.post('/loginrequest', function(req, res1){
-    // client.query(
-    //     "SELECT * FROM usertable where username like '" + req.body.username + "' and password like '" + req.body.password + "'", (err, res) => {
-    //         if (err){
-    //             console.log(err);
-    //         }
-    //         else{
-    //             if (res.rows.length == 0){
-    //                 res1.redirect('/login');
-    //             }
-    //             else{
-    //                 res1.redirect('/');
-    //             }
-    //         }
-    //     }
-    // )
-    req.session.u = req.body.username;
-    req.session.save();
-    res1.redirect('http://localhost:3000');
+    client.query(
+        "SELECT * FROM usertable where username like '" + req.body.username + "' and password like '" + req.body.password + "'", (err, res) => {
+            if (err){
+                console.log(err);
+            }
+            else{
+                if (res.rows.length == 0){
+                    res1.redirect('/login');
+                }
+                else{
+                    req.session.u = req.body.username;
+                    req.session.save();
+                    res1.redirect('http://localhost:3000');
+                }
+            }
+        }
+    )
 });
 
 var users = [];

@@ -280,6 +280,12 @@ class ButtonsBar extends Component {
 		document.getElementById("overlay").style.zIndex = 100;
 	}
 
+	ButtonsBarLogoutClick = ()=>{
+		this.ButtonsBarButtonClick();
+		document.getElementById("LogoutModal").style.zIndex = 101;
+		document.getElementById("LogoutModal").style.display = "block";
+	}
+
 	ButtonsBarProfileClick = ()=>{
 		this.ButtonsBarButtonClick()
 		document.getElementById("ProfileModal").style.zIndex = 101;
@@ -301,7 +307,7 @@ class ButtonsBar extends Component {
 	render() {
 		return (<div id="ButtonsBar">
 		<div id="ButtonsBarFirst">
-		<span className="ButtonsBar-ToolTip" title="Log Out"><div onClick={this.ButtonsBarButtonClick} className="ButtonsBarButton" id="ButtonsBarLogOut"><FontAwesome.FaClose size={30}/>
+		<span className="ButtonsBar-ToolTip" title="Log Out"><div onClick={this.ButtonsBarLogoutClick} className="ButtonsBarButton" id="ButtonsBarLogOut"><FontAwesome.FaClose size={30}/>
 		</div></span>
 		<span className="ButtonsBar-ToolTip" title="View Profile"><div onClick={this.ButtonsBarProfileClick} className="ButtonsBarButton" id="ButtonsBarProfile"><FontAwesome.FaUser size={30}/>
 		</div></span>
@@ -313,6 +319,39 @@ class ButtonsBar extends Component {
 		</div></span>
 		</div>
 		</div>);
+	}
+}
+
+class LogoutModal extends Component {	
+	yesClickHandler(e){
+		e.preventDefault();
+		fetch('/logout', {
+			credentials: 'include'
+		}).then(() => 
+			window.location.reload()
+		)
+	}
+
+	noClickHandler(){
+		document.getElementById("overlay").style.zIndex = -100;
+		document.getElementById("LogoutModal").style.zIndex = -101;
+		document.getElementById("LogoutModal").style.display = "none";
+	}
+
+	render () {
+		return (
+			<div id="LogoutModal">
+				<h1>Are you sure?</h1>
+				
+				<div class="option" onClick={this.yesClickHandler}>
+					<p>Yes</p>
+				</div>
+				
+				<div class="option" onClick={this.noClickHandler}>
+					<p>No</p>
+				</div>
+			</div>			
+		)
 	}
 }
 
@@ -614,6 +653,8 @@ class App extends Component {
 
 	overlayClick(){
 		document.getElementById("overlay").style.zIndex = -100;
+		document.getElementById("LogoutModal").style.zIndex = -101;
+		document.getElementById("LogoutModal").style.display = "none";
 		document.getElementById("SettingsModal").style.zIndex = -101;
 		document.getElementById("SettingsModal").style.display = "none";
 		document.getElementById("ProfileModal").style.zIndex = -101;
@@ -653,6 +694,7 @@ class App extends Component {
 					<FontAwesome.FaBars size="28" color="white" />
 				</div>
 				<Challenge />
+				<LogoutModal />
 				<SettingsModal />
 				<RoomsModal roomsList={this.state.roomsList} joinFunc={this.newTab}/>
 				<ProfileModal />
