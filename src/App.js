@@ -332,6 +332,7 @@ class ButtonsBar extends Component {
 
 	ButtonsBarProfileClick = ()=>{
 		this.ButtonsBarButtonClick()
+		this.props.getUserDetails()
 		document.getElementById("ProfileModal").style.zIndex = 101;
 		document.getElementById("ProfileModal").style.display = "block";
 	}
@@ -418,9 +419,20 @@ class SettingsModal extends Component {
 }
 
 class ProfileModal extends Component {
+	constructor(props){
+		super(props);
+	}
+
 	render() {
 		return (<div id="ProfileModal">
 			<h1>Profile</h1>
+
+			<div>
+				<p>Wins: {this.props.wins}</p>
+				<p>Loss: {this.props.loss}</p>
+				<p>Draws: {this.props.draws}</p>
+				<p>Total Score: {this.props.totalscore}</p>
+			</div>
 		</div>)
 	}
 }
@@ -569,6 +581,7 @@ class App extends Component {
 		socket.on('userInfo', this.userInfo);
 		socket.on('userInfoUpdate', this.userInfoUpdate);
 		socket.on('updateUserList', this.updateUserList);
+		socket.on('userProfile', this.updateUserProfile);
 		socket.on('openMatches', this.updateOpenMatches);
 		socket.on('currentMatches', this.updateCurrentMatches);
 		socket.on('startButton', this.startButtonEvent);
@@ -613,6 +626,19 @@ class App extends Component {
 		}
 	}
 
+	updateUserProfile = (obj) => {
+		console.log("userProfile", obj);
+		this.state.wins = obj.wins;
+		this.state.loss = obj.loss;
+		this.state.draws = obj.draws;
+		this.state.totalscore = obj.totalscore;
+		this.forceUpdate();
+	}
+
+	getUserDetails = (u) => {
+		socket.emit('getProfile', u);
+	}
+	
 	updateOpenMatches = (obj, r)=>{
 		console.log(obj, r);
 		for (let i = 0; i < obj.length; i++) {
@@ -747,10 +773,6 @@ class App extends Component {
 			});
 		});
 	}
-
-	getUserDetails = (u) => {
-		socket.emit('getProfile', u);
-	}
 	
 	leftColumnButtonClick() {
 		if (document.getElementById("leftColumn").visibleState != 1) {
@@ -825,7 +847,7 @@ class App extends Component {
 				<LogoutModal />
 				<SettingsModal />
 				<RoomsModal roomsList={this.state.roomsList} joinFunc={this.newTab}/>
-				<ProfileModal />
+				<ProfileModal wins={this.state.wins} loss={this.state.loss} draws={this.state.draws} totalscore={this.state.totalscore}/>
 				<OtherUserModal />
 				<div id="leftColumn">
 					<OnlinePlayers users={this.state.users.length} />
