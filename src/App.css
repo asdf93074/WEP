@@ -681,6 +681,34 @@ body {
 	text-align: center;
 }
 
+#LogoutModal {
+	background-color: #0f0f0f;
+	width: 50%;
+	z-index: -9999;
+	display: none;
+	position: absolute;
+	top: 25%;
+	left: 25%;
+	color: white;
+	border-radius: 10px;	
+}
+
+#LogoutModal h1 {
+	text-align: center;
+}
+
+#LogoutModal p {
+	font-size: 18px;
+} 
+
+.option p {
+	text-align: center;
+}
+
+.option p:hover {
+	background-color: #4D789A;
+}
+
 #ChallengeModal{
 	background-color: #0f0f0f;
 	width: 50%;

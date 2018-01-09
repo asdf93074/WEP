@@ -59,6 +59,7 @@ class RightClickMenu extends Component {
 	}
 
 	profileClickHandler(){
+		this.props.getUserDetails(document.getElementsByClassName("rightClickMenu")[0].currentTarget);
 		document.getElementById("overlay").style.zIndex = 100;
 		document.getElementById("OtherUserModal").style.zIndex = 101;
 		document.getElementById("OtherUserModal").style.display = "block";
@@ -141,7 +142,12 @@ class TabName extends Component {
 		let tabarr = [];
 		
 		for (let i = 0; i < tabs.length; i++){
-			tabarr.push(<p onClick={this.activeTabHandler.bind(this, tabs[i].value)} id={tabs[i].value}>{tabs[i].value}</p>);
+			tabarr.push(
+				<span>
+					<p onClick={this.activeTabHandler.bind(this, tabs[i].value)} id={tabs[i].value}>{tabs[i].value}</p>
+					<span className="tabCloseButton" onClick={this.props.tabCloseHandler.bind(this, tabs[i].value)}><FontAwesome.FaClose size={15}/></span>
+				</span>
+			);
 		}
 		
 		return (
@@ -318,6 +324,12 @@ class ButtonsBar extends Component {
 		document.getElementById("overlay").style.zIndex = 100;
 	}
 
+	ButtonsBarLogoutClick = ()=>{
+		this.ButtonsBarButtonClick();
+		document.getElementById("LogoutModal").style.zIndex = 101;
+		document.getElementById("LogoutModal").style.display = "block";
+	}
+
 	ButtonsBarProfileClick = ()=>{
 		this.ButtonsBarButtonClick()
 		document.getElementById("ProfileModal").style.zIndex = 101;
@@ -339,7 +351,7 @@ class ButtonsBar extends Component {
 	render() {
 		return (<div id="ButtonsBar">
 		<div id="ButtonsBarFirst">
-		<span className="ButtonsBar-ToolTip" title="Log Out"><div onClick={this.ButtonsBarButtonClick} className="ButtonsBarButton" id="ButtonsBarLogOut"><FontAwesome.FaClose size={30}/>
+		<span className="ButtonsBar-ToolTip" title="Log Out"><div onClick={this.ButtonsBarLogoutClick} className="ButtonsBarButton" id="ButtonsBarLogOut"><FontAwesome.FaClose size={30}/>
 		</div></span>
 		<span className="ButtonsBar-ToolTip" title="View Profile"><div onClick={this.ButtonsBarProfileClick} className="ButtonsBarButton" id="ButtonsBarProfile"><FontAwesome.FaUser size={30}/>
 		</div></span>
@@ -351,6 +363,39 @@ class ButtonsBar extends Component {
 		</div></span>
 		</div>
 		</div>);
+	}
+}
+
+class LogoutModal extends Component {	
+	yesClickHandler(e){
+		e.preventDefault();
+		fetch('/logout', {
+			credentials: 'include'
+		}).then(() => 
+			window.location.reload()
+		)
+	}
+
+	noClickHandler(){
+		document.getElementById("overlay").style.zIndex = -100;
+		document.getElementById("LogoutModal").style.zIndex = -101;
+		document.getElementById("LogoutModal").style.display = "none";
+	}
+
+	render () {
+		return (
+			<div id="LogoutModal">
+				<h1>Are you sure?</h1>
+				
+				<div class="option" onClick={this.yesClickHandler}>
+					<p>Yes</p>
+				</div>
+				
+				<div class="option" onClick={this.noClickHandler}>
+					<p>No</p>
+				</div>
+			</div>			
+		)
 	}
 }
 
@@ -502,6 +547,7 @@ class App extends Component {
 		this.updatechat = this.updatechat.bind(this);
 		//this.connect = this.connect.bind(this);
 		this.newTab = this.newTab.bind(this);
+		this.tabClose = this.tabClose.bind(this);
 		this.columnContainerContextMenu = this.columnContainerContextMenu.bind(this);
 	}
 	
@@ -660,6 +706,7 @@ class App extends Component {
 	}
 	
 	newTab(e) {
+		console.log(e);
 		if (this.state.tabsNameList.indexOf(e) == -1) {
 			socket.emit("roomJoin", e);
 			this.state.tabs.push({value: e, messages: [], users: [], openMatches: [], currentMatches: []});
@@ -677,6 +724,18 @@ class App extends Component {
 			this.forceUpdate();
 		}
 	}
+
+	tabClose(e) {
+		console.log(e);
+		// console.log(this.state.tabsNameList.indexOf(e));
+		if (this.state.tabsNameList.indexOf(e) != -1 ) {
+			socket.emit("roomLeave", e);
+			var index = this.state.tabsNameList.indexOf(e);
+			this.state.tabs.splice(index, 1);
+			this.state.tabsNameList.splice(index, 1);
+			this.forceUpdate();
+		}
+	}
 	
 	setActiveTab = (e)=>{
 		this.setState({activeTab: e}, function() {
@@ -687,6 +746,10 @@ class App extends Component {
 				});
 			});
 		});
+	}
+
+	getUserDetails = (u) => {
+		socket.emit('getProfile', u);
 	}
 	
 	leftColumnButtonClick() {
@@ -716,6 +779,8 @@ class App extends Component {
 
 	overlayClick(){
 		document.getElementById("overlay").style.zIndex = -100;
+		document.getElementById("LogoutModal").style.zIndex = -101;
+		document.getElementById("LogoutModal").style.display = "none";
 		document.getElementById("SettingsModal").style.zIndex = -101;
 		document.getElementById("SettingsModal").style.display = "none";
 		document.getElementById("ProfileModal").style.zIndex = -101;
@@ -757,6 +822,7 @@ class App extends Component {
 					<FontAwesome.FaBars size="28" color="white" />
 				</div>
 				<Challenge />
+				<LogoutModal />
 				<SettingsModal />
 				<RoomsModal roomsList={this.state.roomsList} joinFunc={this.newTab}/>
 				<ProfileModal />
@@ -764,12 +830,12 @@ class App extends Component {
 				<div id="leftColumn">
 					<OnlinePlayers users={this.state.users.length} />
 					<PlayersList users={this.state.users} />
-					<RightClickMenu newtab={this.newTab} messageUser={this.messageUser}/>
-					<ButtonsBar />
+					<RightClickMenu newtab={this.newTab} messageUser={this.messageUser} getUserDetails={this.getUserDetails}/>
+					<ButtonsBar getUserDetails={this.getUserDetails.bind(this, this.state.username)}/>
 				</div>
 				<div id="middleColumn">
 					<div id="tabBar">
-						<TabName tabs={this.state.tabs} activeTabHandler={this.setActiveTab} />
+						<TabName tabs={this.state.tabs} activeTabHandler={this.setActiveTab} tabCloseHandler={this.tabClose}/>
 						{/*<ChatTabRenderer tabs={this.state.tabs} activeTabHandler={this.activeTabHandler}/>*/}
 					</div>
 					<ChatWindowsRenderer playerSelect={this.playerSelect} tabs={this.state.tabs} matchesData={this.state.openMatches}/>

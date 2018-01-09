@@ -26,11 +26,13 @@ app.use(bodyParser.json({type: function(req) {
        return req.headers['content-type'] === '*/*; charset=UTF-8'
 }}));
 
-// app.use(function(req, res, next) {
-//     res.header("Access-Control-Allow-Origin", "*");
-//     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-//     next();
-// });
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+    res.header("Access-Control-Allow-Credentials", "true");
+    res.header("Access-Control-Allow-Headers", "Origin,Content-Type, Authorization, x-id, Content-Length, X-Requested-With");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    next();
+});
 // var router = express.Router();
 
 var server = app.listen(3001, '0.0.0.0', function(){
@@ -56,7 +58,7 @@ app.post('/signuprequest', function(req, res){
     if(!(/^[A-Za-z0-9\_.]+[@]+[A-Za-z0-9]+[.]+[A-Za-z0-9]/.test(req.body.email))){
         res.redirect('/signup');
     }
-    else if(!(req.body.password.length<6 || req.body.password.length>24)){
+    else if(req.body.password.length<6 || req.body.password.length>24){
         res.redirect('/signup')
     }
     else if(!(/[a-z]/.test(req.body.password)   &&   /[A-Z]/.test(req.body.password)   &&  /[0-9]/.test(req.body.password))){
@@ -78,25 +80,30 @@ app.get('/api/user', (req, res) => {
     }
   });
 
+app.get('/logout', (req, res) => {
+    req.session.destroy();
+    res.redirect('http://localhost:3001/login');
+    // console.log("Logout request");
+})
+
 app.post('/loginrequest', function(req, res1){
-    // client.query(
-    //     "SELECT * FROM usertable where username like '" + req.body.username + "' and password like '" + req.body.password + "'", (err, res) => {
-    //         if (err){
-    //             console.log(err);
-    //         }
-    //         else{
-    //             if (res.rows.length == 0){
-    //                 res1.redirect('/login');
-    //             }
-    //             else{
-    //                 res1.redirect('/');
-    //             }
-    //         }
-    //     }
-    // )
-    req.session.u = req.body.username;
-    req.session.save();
-    res1.redirect('http://localhost:3000');
+    client.query(
+        "SELECT * FROM usertable where username like '" + req.body.username + "' and password like '" + req.body.password + "'", (err, res) => {
+            if (err){
+                console.log(err);
+            }
+            else{
+                if (res.rows.length == 0){
+                    res1.redirect('/login');
+                }
+                else{
+                    req.session.u = req.body.username;
+                    req.session.save();
+                    res1.redirect('http://localhost:3000');
+                }
+            }
+        }
+    )
 });
 
 var users = [];
@@ -265,6 +272,10 @@ io.sockets.on('connection', (socket) => {
         }
     });
 
+    socket.on('getProfile', function(){
+        
+    })
+
     // socket.on('changeroom', function(newroom){
     //     console.log('Changing room to:' + newroom);
     //     socket.leave(socket.room);
@@ -282,7 +293,15 @@ io.sockets.on('connection', (socket) => {
         roomsToUsers[roomName].push(socket.username);
         socket.emit('updatechat', {message: "Welcome to DoubleDamage, a Dota 2 league.", username: "DDBot", room: roomName, type: "notice"});
         io.sockets.in(socket.room).emit('updateUserList', roomsToUsers[roomName], roomName);
-	});
+    });
+    
+    socket.on('roomLeave', function(roomName) {
+        socket.leave(roomName);
+        rooms[roomsIndex[roomName]].numberOfPlayers--;
+        io.emit('roomslist', rooms);
+        roomsToUsers[roomName].splice(roomsToUsers[roomName].indexOf(socket.username), 1);
+        io.sockets.in(socket.room).emit('updateUserList', roomsToUsers[roomName], roomName);
+    });
 
     socket.on('chat', function(data){
         console.log(data);

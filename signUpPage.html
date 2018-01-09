@@ -1,172 +1,104 @@
- 
-<!DOCTYPE html>
 <html>
-<head>
-  <link rel="stylesheet" type="text/css" href="webproject.css">
-  
-  <!--For bootstrap-->
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.6/umd/popper.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"></script>
- 
-  <!--For google sign in-->
-  <script src="https://apis.google.com/js/platform.js" async defer></script>
-  <meta name="google-signin-client_id" content="641965152291-qol5pm47g3blhkk78emoh6h60ahr5sne.apps.googleusercontent.com">
- 
-  <!--For icons-->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-</head>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.2.0/zxcvbn.js"></script>
-
-<body>
-<!--Facebook API JS-->
-<script>
-  window.fbAsyncInit = function() {
-    FB.init({
-      appId      : '140261903259932',
-      cookie     : true,
-      xfbml      : true,
-      version    : 'v2.11'
-    });
-      
-    FB.AppEvents.logPageView();   
-      
-  };
-
-  (function(d, s, id){
-     var js, fjs = d.getElementsByTagName(s)[0];
-     if (d.getElementById(id)) {return;}
-     js = d.createElement(s); js.id = id;
-     js.src = "https://connect.facebook.net/en_US/sdk.js";
-     fjs.parentNode.insertBefore(js, fjs);
-   }(document, 'script', 'facebook-jssdk'));
-</script>
-
-
-<script type="text/javascript" src="login-signup.js"></script>   
-<section class="col-sm-1 col-md-2 col-lg-3"></section>
-<section class="col-sm-10 col-md-8 col-lg-6 signup">
-
-    <div class="title">Sign Up</div>
-    <form id="loginForm" action="/signuprequest" method="post" autocomplete="on">
-        
-        <div class="external-signup">
-            <label class="social"><i>with your social network</i></label>
-          < 
-          <!--Google-->
-            <div id="my-signin2" style="margin-bottom: 20px"></div>
-            <script>
-            function onSuccess(googleUser) {
-              console.log('Logged in as: ' + googleUser.getBasicProfile().getName());
+    <head>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <style>
+            body {
+                background-color: #37383a;
             }
-            function onFailure(error) {
-              console.log(error);
+
+            #login {
+                padding-top: 50px
             }
-            function renderButton() {
-              gapi.signin2.render('my-signin2', {
-                'scope': 'profile email',
-                'width': 181,
-                'height': 28,
-                'longtitle': true,
-                'theme': 'dark',
-                'onsuccess': onSuccess,
-                'onfailure': onFailure
-              });
+            #login .form-wrap {
+                width: 30%;
+                margin: 0 auto;
             }
-            </script>
-            <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>
+            #login h1 {
+                color: #1fa67b;
+                font-size: 18px;
+                text-align: center;
+                font-weight: bold;
+                padding-bottom: 20px;
+            }
+            #login .form-group {
+                margin-bottom: 25px;
+            }
+            #login .checkbox {
+                margin-bottom: 20px;
+                position: relative;
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                -o-user-select: none;
+                user-select: none;
+            }
+            #login .checkbox.show:before {
+                content: '\e013';
+                color: #1fa67b;
+                font-size: 17px;
+                margin: 1px 0 0 3px;
+                position: absolute;
+                pointer-events: none;
+                font-family: 'Glyphicons Halflings';
+            }
+            #login .checkbox .character-checkbox {
+                width: 25px;
+                height: 25px;
+                cursor: pointer;
+                border-radius: 3px;
+                border: 1px solid #ccc;
+                vertical-align: middle;
+                display: inline-block;
+            }
+            #login .checkbox .label {
+                color: #6d6d6d;
+                font-size: 13px;
+                font-weight: normal;
+            }
+            #login .btn.btn-custom {
+                font-size: 14px;
+                margin-bottom: 20px;
+            }
+            #login .forget {
+                font-size: 13px;
+                text-align: center;
+                display: block;
+            }
+        </style>
+    </head>
 
-            <!--Facebook-->
-            <div class="fb-login-button" data-max-rows="1" data-size="medium" data-button-type="continue_with" data-show-faces="false" data-auto-logout-link="false" data-use-continue-as="false" style="display:inline-block;"></div>
-        </div>
-
-        <table width="100%">
-            <td><hr /></td>
-            <td id="or"><i>Or</i></td>
-            <td><hr /></td>
-        </table>​
-
-
-        <div class="localsignup">    
-            <!--<div class="form-group has-feedback">-->
-                <label><span style="display:inline" class="glyphicon glyphicon-user"></span>Username</label>
-                <input id="username" name="username" class="col-sm-10 col-md-10 col-lg-12 form-control" type="text" required placeholder="Username" onkeyup="validateUsername()">
-                <!--<span class="form-control-feedback glyphicon glyphicon-ok"></span>-->
-            <!--/div>-->
-                <br>
-            <!--<script>
-            $(document).ready(function() {
-     $('#loginForm').validate({
-    rules: {
-      username: {
-        required: true,
-        username: true
-      },
-    },
-    
-    highlight: function(element, errorClass, validClass) { 
-      $(element).nextAll('.form-control-feedback').show().removeClass('glyphicon-ok').addClass('glyphicon-remove');
-      $(element).addClass(errorClass).removeClass(validClass);
-      $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
-    },
-    success: function(element) {
-      $(element).nextAll('.form-control-feedback').show().removeClass('glyphicon-remove').addClass('glyphicon-ok');
-   element.closest('.form-group').removeClass('has-error').addClass('has-success');
-      $(element).remove();
-    }
-  });
-});-->
-            </script>
-            <a ahref="#" data-toggle="tooltip" title="Select a username here."></a>
-            <script type="text/javascript">
-                $(document).ready(function(){
-                    $('[data-toggle="tooltip"]').tooltip();   
-                });
-            </script>
-
-            <p id="err1"></p>
-
-            <br>
-
-
-            <label><span class="glyphicon glyphicon-envelope"></span>Email</label>
-             <a ahref="#" data-toggle="tooltip" title="Enter your email here.">
-                <input class="col-sm-10 col-md-10 col-lg-12" id="email" name="email" type="text" required placeholder="Email" onkeyup="validateEmail();">
-            </a>
-            <p id="err2"></p>
-
-            
-
-            <br><br>
-            <label><span class="glyphicon glyphicon-lock"></span>Password</label>
-            <a ahref="#" data-toggle="tooltip" title="Select a password here.">
-                <input class="col-sm-10 col-md-10 col-lg-12" id="password" name="password" type="password" required placeholder="Password" onkeyup="checkStrength(); validatePasssword();">
-            </a>
-            <br> <br>
-            <label style="font-size: 12px; padding-top: 10px;">Password Strength</label>
-            <meter max="4" id="password-strength-meter"></meter>
-            <label id="pstrength" style="font-size: 12px; padding-top: 0px; padding-bottom: 0px;"></label>
-            <p id="err3"></p>
-            <p id="err31"></p>
-
-            
-            <label><span class="glyphicon glyphicon-lock"></span>Retype Password</label>
-            <a ahref="#" data-toggle="tooltip" title="Retype your password here.">
-                <input class="col-sm-10 col-md-10 col-lg-" id="retype-password" type="password" required placeholder="Retype Password" onkeyup="validateRePassword()">
-            </a>
-            <p id="err4"></p>
-           
-            <br><br>
-            <!-- <a href="#" class="okay">Register</a>  -->
-            <input type="submit">
-        </div>
-    </form>
-</section>
-<section class="col-sm-1 col-md-2 col-lg-3"></section>
-</body>
+    <body> 
+        <section id="login">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="form-wrap" style="background-color: #1e1e1e; padding: 20px; border-radius: 10px">
+                        <h1 style="color: #2387b7">Sign up with your email and username</h1>
+                            <form role="form" action="/signuprequest" method="post" id="login-form" autocomplete="off">
+                                <div class="form-group">
+                                        <label for="username" class="sr-only">Username</label>
+                                        <input type="username" name="username" id="username" class="form-control" placeholder="Username">
+                                    </div>
+                                <div class="form-group">
+                                    <label for="email" class="sr-only">Email</label>
+                                    <input type="email" name="email" id="email" class="form-control" placeholder="Email">
+                                </div>
+                                <div class="form-group">
+                                    <label for="key" class="sr-only">Password</label>
+                                    <input type="password" name="password" id="password" class="form-control" placeholder="Password">
+                                </div>
+                                <div class="form-group">
+                                    <label for="key" class="sr-only">Re-type Password</label>
+                                    <input type="password" name="key" id="key" class="form-control" placeholder="Re-type Password">
+                                </div>    
+                                <input type="submit" id="btn-login" class="btn btn-custom btn-lg btn-block" value="Sign up">
+                            </form>
+                            <a href="/login" class="forget" data-toggle="modal" data-target=".forget-modal">Log in</a>
+                            <hr>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </body>
 </html>
