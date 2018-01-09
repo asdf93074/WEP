@@ -61,6 +61,7 @@ class RightClickMenu extends Component {
 	}
 
 	profileClickHandler(){
+		this.props.getUserDetails(document.getElementsByClassName("rightClickMenu")[0].currentTarget);
 		document.getElementById("overlay").style.zIndex = 100;
 		document.getElementById("OtherUserModal").style.zIndex = 101;
 		document.getElementById("OtherUserModal").style.display = "block";
@@ -143,7 +144,12 @@ class TabName extends Component {
 		let tabarr = [];
 		
 		for (let i = 0; i < tabs.length; i++){
-			tabarr.push(<p onClick={this.activeTabHandler.bind(this, tabs[i].value)} id={tabs[i].value}>{tabs[i].value}</p>);
+			tabarr.push(
+				<span>
+					<p onClick={this.activeTabHandler.bind(this, tabs[i].value)} id={tabs[i].value}>{tabs[i].value}</p>
+					<span className="tabCloseButton" onClick={this.props.tabCloseHandler.bind(this, tabs[i].value)}><FontAwesome.FaClose size={15}/></span>
+				</span>
+			);
 		}
 		
 		return (
@@ -490,6 +496,7 @@ class App extends Component {
 		this.updatechat = this.updatechat.bind(this);
 		//this.connect = this.connect.bind(this);
 		this.newTab = this.newTab.bind(this);
+		this.tabClose = this.tabClose.bind(this);
 		this.columnContainerContextMenu = this.columnContainerContextMenu.bind(this);
 	}
 	
@@ -599,6 +606,7 @@ class App extends Component {
 	}
 	
 	newTab(e) {
+		console.log(e);
 		if (this.state.tabsNameList.indexOf(e) == -1) {
 			socket.emit("roomJoin", e);
 			this.state.tabs.push({value: e, messages: [], users: [], openMatches: []});
@@ -616,6 +624,18 @@ class App extends Component {
 			this.forceUpdate();
 		}
 	}
+
+	tabClose(e) {
+		console.log(e);
+		// console.log(this.state.tabsNameList.indexOf(e));
+		if (this.state.tabsNameList.indexOf(e) != -1 ) {
+			socket.emit("roomLeave", e);
+			var index = this.state.tabsNameList.indexOf(e);
+			this.state.tabs.splice(index, 1);
+			this.state.tabsNameList.splice(index, 1);
+			this.forceUpdate();
+		}
+	}
 	
 	setActiveTab = (e)=>{
 		this.setState({activeTab: e}, function() {
@@ -624,6 +644,10 @@ class App extends Component {
 				document.getElementsByClassName("rightClickMenu")[0].currentRoom = e;
 			});
 		});
+	}
+
+	getUserDetails = (u) => {
+		socket.emit('getProfile', u);
 	}
 	
 	leftColumnButtonClick() {
@@ -702,12 +726,12 @@ class App extends Component {
 				<div id="leftColumn">
 					<OnlinePlayers users={this.state.users.length} />
 					<PlayersList users={this.state.users} />
-					<RightClickMenu newtab={this.newTab} messageUser={this.messageUser}/>
-					<ButtonsBar />
+					<RightClickMenu newtab={this.newTab} messageUser={this.messageUser} getUserDetails={this.getUserDetails}/>
+					<ButtonsBar getUserDetails={this.getUserDetails.bind(this, this.state.username)}/>
 				</div>
 				<div id="middleColumn">
 					<div id="tabBar">
-						<TabName tabs={this.state.tabs} activeTabHandler={this.setActiveTab} />
+						<TabName tabs={this.state.tabs} activeTabHandler={this.setActiveTab} tabCloseHandler={this.tabClose}/>
 						{/*<ChatTabRenderer tabs={this.state.tabs} activeTabHandler={this.activeTabHandler}/>*/}
 					</div>
 					<ChatWindowsRenderer tabs={this.state.tabs} />

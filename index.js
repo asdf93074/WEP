@@ -237,6 +237,10 @@ io.sockets.on('connection', (socket) => {
         }
     });
 
+    socket.on('getProfile', function(){
+        
+    })
+
     // socket.on('changeroom', function(newroom){
     //     console.log('Changing room to:' + newroom);
     //     socket.leave(socket.room);
@@ -253,7 +257,15 @@ io.sockets.on('connection', (socket) => {
         roomsToUsers[roomName].push(socket.username);
         socket.emit('updatechat', {message: "Welcome to DoubleDamage, a Dota 2 league.", username: "DDBot", room: roomName, type: "notice"});
         io.sockets.in(socket.room).emit('updateUserList', roomsToUsers[roomName], roomName);
-	});
+    });
+    
+    socket.on('roomLeave', function(roomName) {
+        socket.leave(roomName);
+        rooms[roomsIndex[roomName]].numberOfPlayers--;
+        io.emit('roomslist', rooms);
+        roomsToUsers[roomName].splice(roomsToUsers[roomName].indexOf(socket.username), 1);
+        io.sockets.in(socket.room).emit('updateUserList', roomsToUsers[roomName], roomName);
+    });
 
     socket.on('chat', function(data){
         if (usersToSocket[data.room] == undefined) {
