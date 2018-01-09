@@ -65,8 +65,12 @@ app.post('/signuprequest', function(req, res){
     } else{
         client.query(
             "INSERT INTO usertable (email, username, password, steamid) VALUES ($1, $2, $3, $4)",
-            [req.body.email, req.body.username, req.body.password, Math.floor(Math.random()*1000)]
+            [req.body.email, req.body.username, req.body.password, req.body.steamid]
         );
+        client.query(
+            "INSERT INTO userextras (username, wins, loss, draws, totalscore) VALUES ($1, $2, $3, $4, $5)",
+            [req.body.username, 0, 0, 0, 1000]
+        )
         res.redirect('/login');    
     }
 });
@@ -111,6 +115,7 @@ var roomsIndex = {'room1': 0, 'room2': 1, 'room3': 2};
 var roomsToUsers = {'room1': [], 'room2': [], 'room3': []};
 var roomsToOpenMatches = {'room1': [], 'room2': [], 'room3': []};
 var usersToSocket = {};
+var usersToSteamID = {};
 var userInfo = {};
 var openMatches = [];
 var openMatchesIndex = {};
@@ -133,7 +138,7 @@ function getUsers(){
         }
         else{
             for (var i = 0; i < res.rows.length; i++){
-                retusers.push(res.rows[i].Username);
+                retusers.push(res.rows[i].username);
             }
             users = users.concat(retusers);
             // console.log(users);
@@ -141,7 +146,21 @@ function getUsers(){
     });    
 }
 
+function getUserProfiles(){
+    client.query("SELECT username, steamid FROM usertable", (err, res) => {
+        if (err) {
+            console.log("Error querying");
+        }
+        else {
+            for (var i = 0; i < res.rows.length; i++){
+                usersToSteamID[res.rows[i].username] = res.rows[i].steamid;
+            }
+        }
+    });
+}
+
 getUsers();
+getUserProfiles();
 
 var challengeErrorMessgages = {
     20: "This challenge has expired",
@@ -237,9 +256,27 @@ io.sockets.on('connection', (socket) => {
         }
     });
 
-    socket.on('getProfile', function(){
-        
-    })
+    socket.on('getProfile', function(user){
+        console.log("server", user);
+        var data = {};
+        client.query(
+            "SELECT wins, loss, draws, totalscore FROM userextras where username like '" + user + "'", (err, res) => {
+                if (err) {
+                    console.log("Error querying");
+                }
+                else{
+                    data = {
+                            wins: res.rows[0].wins,
+                            loss: res.rows[0].loss,
+                            draws: res.rows[0].draws,
+                            totalscore: res.rows[0].totalscore
+                        }
+                    console.log("data", data);
+                    socket.emit('userProfile', data);
+                }
+            }
+        )
+    });
 
     // socket.on('changeroom', function(newroom){
     //     console.log('Changing room to:' + newroom);
